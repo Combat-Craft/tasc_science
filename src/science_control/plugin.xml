@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<library path="science_2026">
+  <class
+    name="science_2026/Science2026System"
+    type="science_2026::Science2026System"
+    base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Mixed science ros2_control hardware interface for auger, actuator, and servo.
+    </description>
+  </class>
+</library>

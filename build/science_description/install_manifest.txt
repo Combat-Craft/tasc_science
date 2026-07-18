@@ -1,0 +1,16 @@
+/home/rida/tasc_science/install/science_description/share/science_description/urdf/science_2026.urdf.xacro
+/home/rida/tasc_science/install/science_description/share/ament_index/resource_index/package_run_dependencies/science_description
+/home/rida/tasc_science/install/science_description/share/ament_index/resource_index/parent_prefix_path/science_description
+/home/rida/tasc_science/install/science_description/share/science_description/environment/ament_prefix_path.sh
+/home/rida/tasc_science/install/science_description/share/science_description/environment/ament_prefix_path.dsv
+/home/rida/tasc_science/install/science_description/share/science_description/environment/path.sh
+/home/rida/tasc_science/install/science_description/share/science_description/environment/path.dsv
+/home/rida/tasc_science/install/science_description/share/science_description/local_setup.bash
+/home/rida/tasc_science/install/science_description/share/science_description/local_setup.sh
+/home/rida/tasc_science/install/science_description/share/science_description/local_setup.zsh
+/home/rida/tasc_science/install/science_description/share/science_description/local_setup.dsv
+/home/rida/tasc_science/install/science_description/share/science_description/package.dsv
+/home/rida/tasc_science/install/science_description/share/ament_index/resource_index/packages/science_description
+/home/rida/tasc_science/install/science_description/share/science_description/cmake/science_descriptionConfig.cmake
+/home/rida/tasc_science/install/science_description/share/science_description/cmake/science_descriptionConfig-version.cmake
+/home/rida/tasc_science/install/science_description/share/science_description/package.xml

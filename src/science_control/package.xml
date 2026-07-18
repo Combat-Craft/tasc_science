@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>science_control</name>
+  <version>0.0.1</version>
+
+  <description>
+    ros2_control hardware interface and teleoperation nodes for the SCIENCE 2026 robot
+  </description>
+
+  <maintainer email="you@example.com"> him only fr: Ibrahim Ali</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <depend>hardware_interface</depend>
+  <depend>pluginlib</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

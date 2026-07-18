@@ -1,0 +1,11 @@
+/home/rida/tasc_science/build/science_control/CMakeFiles/uninstall.dir
+/home/rida/tasc_science/build/science_control/CMakeFiles/science_control_uninstall.dir
+/home/rida/tasc_science/build/science_control/CMakeFiles/science_2026.dir
+/home/rida/tasc_science/build/science_control/CMakeFiles/science_2026_keyboard_teleop.dir
+/home/rida/tasc_science/build/science_control/CMakeFiles/test.dir
+/home/rida/tasc_science/build/science_control/CMakeFiles/edit_cache.dir
+/home/rida/tasc_science/build/science_control/CMakeFiles/rebuild_cache.dir
+/home/rida/tasc_science/build/science_control/CMakeFiles/list_install_components.dir
+/home/rida/tasc_science/build/science_control/CMakeFiles/install.dir
+/home/rida/tasc_science/build/science_control/CMakeFiles/install/local.dir
+/home/rida/tasc_science/build/science_control/CMakeFiles/install/strip.dir
