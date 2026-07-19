@@ -131,32 +131,32 @@
     </hardware>
 
     <joint name="base_yaw">
-      <command_interface name="velocity"/>
+      <command_interface name="position"/>
       <state_interface name="position"/>
     </joint>
 
     <joint name="shoulder_extension">
-      <command_interface name="velocity"/>
+      <command_interface name="position"/>
       <state_interface name="position"/>
     </joint>
 
     <joint name="elbow_extension">
-      <command_interface name="velocity"/>
+      <command_interface name="position"/>
       <state_interface name="position"/>
     </joint>
 
     <joint name="wrist_roll">
-      <command_interface name="velocity"/>
+      <command_interface name="position"/>
       <state_interface name="position"/>
     </joint>
 
     <joint name="wrist_twist">
-      <command_interface name="velocity"/>
+      <command_interface name="position"/>
       <state_interface name="position"/>
     </joint>
 
     <joint name="claw">
-      <command_interface name="velocity"/>
+      <command_interface name="position"/>
       <state_interface name="position"/>
     </joint>
   </ros2_control>

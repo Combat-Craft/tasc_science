@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/rida/tasc_science/src/science_description
+CMAKE_SOURCE_DIR = /home/ibrahim/tasc_science/src/science_description
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/rida/tasc_science/build/science_description
+CMAKE_BINARY_DIR = /home/ibrahim/tasc_science/build/science_description
 
 # Utility rule file for science_description_uninstall.
 
@@ -67,7 +67,7 @@ include CMakeFiles/science_description_uninstall.dir/compiler_depend.make
 include CMakeFiles/science_description_uninstall.dir/progress.make
 
 CMakeFiles/science_description_uninstall:
-	/usr/bin/cmake -P /home/rida/tasc_science/build/science_description/ament_cmake_uninstall_target/ament_cmake_uninstall_target.cmake
+	/usr/bin/cmake -P /home/ibrahim/tasc_science/build/science_description/ament_cmake_uninstall_target/ament_cmake_uninstall_target.cmake
 
 science_description_uninstall: CMakeFiles/science_description_uninstall
 science_description_uninstall: CMakeFiles/science_description_uninstall.dir/build.make
@@ -82,6 +82,6 @@ CMakeFiles/science_description_uninstall.dir/clean:
 .PHONY : CMakeFiles/science_description_uninstall.dir/clean
 
 CMakeFiles/science_description_uninstall.dir/depend:
-	cd /home/rida/tasc_science/build/science_description && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/rida/tasc_science/src/science_description /home/rida/tasc_science/src/science_description /home/rida/tasc_science/build/science_description /home/rida/tasc_science/build/science_description /home/rida/tasc_science/build/science_description/CMakeFiles/science_description_uninstall.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ibrahim/tasc_science/build/science_description && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ibrahim/tasc_science/src/science_description /home/ibrahim/tasc_science/src/science_description /home/ibrahim/tasc_science/build/science_description /home/ibrahim/tasc_science/build/science_description /home/ibrahim/tasc_science/build/science_description/CMakeFiles/science_description_uninstall.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/science_description_uninstall.dir/depend
 

@@ -1,5 +1,5 @@
 CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.o: \
- /home/rida/tasc_science/src/science_control/teleop/science_2026_keyboard_teleop.cpp \
+ /home/ibrahim/tasc_science/src/science_control/teleop/science_2026_keyboard_teleop.cpp \
  /usr/include/stdc-predef.h /usr/include/x86_64-linux-gnu/sys/select.h \
  /usr/include/features.h /usr/include/features-time64.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \

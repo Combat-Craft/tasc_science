@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/rida/tasc_science/src/science_bringup
+CMAKE_SOURCE_DIR = /home/ibrahim/tasc_science/src/science_bringup
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/rida/tasc_science/build/science_bringup
+CMAKE_BINARY_DIR = /home/ibrahim/tasc_science/build/science_bringup
 
 # Utility rule file for science_bringup_uninstall.
 
@@ -67,7 +67,7 @@ include CMakeFiles/science_bringup_uninstall.dir/compiler_depend.make
 include CMakeFiles/science_bringup_uninstall.dir/progress.make
 
 CMakeFiles/science_bringup_uninstall:
-	/usr/bin/cmake -P /home/rida/tasc_science/build/science_bringup/ament_cmake_uninstall_target/ament_cmake_uninstall_target.cmake
+	/usr/bin/cmake -P /home/ibrahim/tasc_science/build/science_bringup/ament_cmake_uninstall_target/ament_cmake_uninstall_target.cmake
 
 science_bringup_uninstall: CMakeFiles/science_bringup_uninstall
 science_bringup_uninstall: CMakeFiles/science_bringup_uninstall.dir/build.make
@@ -82,6 +82,6 @@ CMakeFiles/science_bringup_uninstall.dir/clean:
 .PHONY : CMakeFiles/science_bringup_uninstall.dir/clean
 
 CMakeFiles/science_bringup_uninstall.dir/depend:
-	cd /home/rida/tasc_science/build/science_bringup && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/rida/tasc_science/src/science_bringup /home/rida/tasc_science/src/science_bringup /home/rida/tasc_science/build/science_bringup /home/rida/tasc_science/build/science_bringup /home/rida/tasc_science/build/science_bringup/CMakeFiles/science_bringup_uninstall.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ibrahim/tasc_science/build/science_bringup && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ibrahim/tasc_science/src/science_bringup /home/ibrahim/tasc_science/src/science_bringup /home/ibrahim/tasc_science/build/science_bringup /home/ibrahim/tasc_science/build/science_bringup /home/ibrahim/tasc_science/build/science_bringup/CMakeFiles/science_bringup_uninstall.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/science_bringup_uninstall.dir/depend
 

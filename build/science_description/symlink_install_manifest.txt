@@ -1,0 +1,16 @@
+/home/ibrahim/tasc_science/install/science_description/share/science_description/urdf/science_2026.urdf.xacro
+/home/ibrahim/tasc_science/install/science_description/share/ament_index/resource_index/package_run_dependencies/science_description
+/home/ibrahim/tasc_science/install/science_description/share/ament_index/resource_index/parent_prefix_path/science_description
+/home/ibrahim/tasc_science/install/science_description/share/science_description/environment/ament_prefix_path.sh
+/home/ibrahim/tasc_science/install/science_description/share/science_description/environment/ament_prefix_path.dsv
+/home/ibrahim/tasc_science/install/science_description/share/science_description/environment/path.sh
+/home/ibrahim/tasc_science/install/science_description/share/science_description/environment/path.dsv
+/home/ibrahim/tasc_science/install/science_description/share/science_description/local_setup.bash
+/home/ibrahim/tasc_science/install/science_description/share/science_description/local_setup.sh
+/home/ibrahim/tasc_science/install/science_description/share/science_description/local_setup.zsh
+/home/ibrahim/tasc_science/install/science_description/share/science_description/local_setup.dsv
+/home/ibrahim/tasc_science/install/science_description/share/science_description/package.dsv
+/home/ibrahim/tasc_science/install/science_description/share/ament_index/resource_index/packages/science_description
+/home/ibrahim/tasc_science/install/science_description/share/science_description/cmake/science_descriptionConfig.cmake
+/home/ibrahim/tasc_science/install/science_description/share/science_description/cmake/science_descriptionConfig-version.cmake
+/home/ibrahim/tasc_science/install/science_description/share/science_description/package.xml

@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/rida/tasc_science/src/science_control/teleop/science_2026_keyboard_teleop.cpp" "CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.o" "gcc" "CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.o.d"
+  "/home/ibrahim/tasc_science/src/science_control/teleop/science_2026_keyboard_teleop.cpp" "CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.o" "gcc" "CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.o.d"
   )
 
 # Targets to which this target links.

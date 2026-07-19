@@ -77,7 +77,8 @@ hardware_interface::CallbackReturn Science2026System::on_init(
 // ============================================================================
 // EXPORT STATE INTERFACES
 // ============================================================================
-std::vector<hardware_interface::StateInterface> Science2026System::export_state_interfaces()
+std::vector<hardware_interface::StateInterface>
+Science2026System::export_state_interfaces()
 {
   std::vector<hardware_interface::StateInterface> state_interfaces;
   state_interfaces.reserve(NUM_JOINTS);
@@ -96,7 +97,8 @@ std::vector<hardware_interface::StateInterface> Science2026System::export_state_
 // ============================================================================
 // EXPORT COMMAND INTERFACES
 // ============================================================================
-std::vector<hardware_interface::CommandInterface> Science2026System::export_command_interfaces()
+std::vector<hardware_interface::CommandInterface>
+Science2026System::export_command_interfaces()
 {
   std::vector<hardware_interface::CommandInterface> command_interfaces;
   command_interfaces.reserve(NUM_JOINTS);
@@ -258,9 +260,13 @@ uint8_t Science2026System::command_to_byte(double value) const
 // ============================================================================
 double Science2026System::angle_to_servo_byte(double angle_rad) const
 {
-  double angle_deg = angle_rad * 180.0 / M_PI;
-  angle_deg = clampf(angle_deg, 0.0, 180.0);
-  return angle_deg;
+  const double joint_angle_deg =
+    angle_rad * 180.0 / M_PI;
+
+  return clampf(
+    joint_angle_deg + 90.0,
+    0.0,
+    180.0);
 }
 
 // ============================================================================
@@ -442,10 +448,9 @@ hardware_interface::CallbackReturn Science2026System::on_activate(
     hw_states_[BASE_IDX] = pos_deg * M_PI / 180.0;
     hw_commands_[BASE_IDX] = hw_states_[BASE_IDX];
 
-    const double continuous_target = 1e9;
     if (!phidget_ok(
-          PhidgetStepper_setTargetPosition(stepper_, continuous_target),
-          "setTargetPosition"))
+      PhidgetStepper_setTargetPosition(stepper_, pos_deg),
+      "setTargetPosition"))
     {
       return hardware_interface::CallbackReturn::ERROR;
     }
@@ -486,38 +491,66 @@ hardware_interface::CallbackReturn Science2026System::on_deactivate(
 // ============================================================================
 hardware_interface::return_type Science2026System::read(
   const rclcpp::Time &,
-  const rclcpp::Duration &)
+  const rclcpp::Duration & period)
 {
-  // ========================================================================
-  // REAL HARDWARE: Read Stepper Motor Position (base_yaw)
-  // ========================================================================
+  const double dt =
+    std::clamp(period.seconds(), 0.0, 0.1);
+
+  // Base position from the Phidget
   if (stepper_ && stepper_attached_)
   {
-    double pos_deg = 0.0;
+    double position_deg = 0.0;
+
     if (phidget_ok(
-          PhidgetStepper_getPosition(stepper_, &pos_deg),
+          PhidgetStepper_getPosition(
+            stepper_,
+            &position_deg),
           "getPosition"))
     {
-      hw_states_[BASE_IDX] = pos_deg * M_PI / 180.0;
+      hw_states_[BASE_IDX] =
+        position_deg * M_PI / 180.0;
     }
   }
   else
   {
-    hw_states_[BASE_IDX] = hw_commands_[BASE_IDX];
+    hw_states_[BASE_IDX] =
+      hw_commands_[BASE_IDX];
   }
 
-  // ========================================================================
-  // REAL HARDWARE: Servo State (elbow)
-  // ========================================================================
-  hw_states_[ELBOW_IDX] = servo_current_angle_deg_ * M_PI / 180.0;
+  // Estimate shoulder position because there is no encoder yet
+  const double shoulder_error =
+    hw_commands_[SHOULDER_IDX] -
+    hw_states_[SHOULDER_IDX];
 
-  // ========================================================================
-  // FAKE MOTORS: Just echo commands
-  // ========================================================================
-  hw_states_[SHOULDER_IDX] = hw_commands_[SHOULDER_IDX];
-  hw_states_[WRIST_ROLL_IDX] = hw_commands_[WRIST_ROLL_IDX];
-  hw_states_[WRIST_TWIST_IDX] = hw_commands_[WRIST_TWIST_IDX];
-  hw_states_[CLAW_IDX] = hw_commands_[CLAW_IDX];
+  const double shoulder_max_step =
+    0.45 * dt;
+
+  hw_states_[SHOULDER_IDX] +=
+    std::clamp(
+      shoulder_error,
+      -shoulder_max_step,
+      shoulder_max_step);
+
+  hw_states_[SHOULDER_IDX] =
+    clampf(
+      hw_states_[SHOULDER_IDX],
+      -1.57,
+      1.57);
+
+  // Convert the last servo angle back to joint radians
+  hw_states_[ELBOW_IDX] =
+    (servo_current_angle_deg_ - 90.0) *
+    M_PI / 180.0;
+
+  // Joints without physical feedback
+  hw_states_[WRIST_ROLL_IDX] =
+    hw_commands_[WRIST_ROLL_IDX];
+
+  hw_states_[WRIST_TWIST_IDX] =
+    hw_commands_[WRIST_TWIST_IDX];
+
+  hw_states_[CLAW_IDX] =
+    hw_commands_[CLAW_IDX];
 
   return hardware_interface::return_type::OK;
 }
@@ -529,56 +562,76 @@ hardware_interface::return_type Science2026System::write(
   const rclcpp::Time &,
   const rclcpp::Duration &)
 {
-  // ========================================================================
-  // REAL HARDWARE: Stepper Motor (base_yaw) - CONTINUOUS SPIN
-  // ========================================================================
+  // Clamp all commanded joint positions
+  hw_commands_[BASE_IDX] =
+    clampf(hw_commands_[BASE_IDX], -3.14, 3.14);
+
+  hw_commands_[SHOULDER_IDX] =
+    clampf(hw_commands_[SHOULDER_IDX], -1.57, 1.57);
+
+  hw_commands_[ELBOW_IDX] =
+    clampf(hw_commands_[ELBOW_IDX], -1.57, 1.57);
+
+  hw_commands_[WRIST_ROLL_IDX] =
+    clampf(hw_commands_[WRIST_ROLL_IDX], -1.57, 1.57);
+
+  hw_commands_[WRIST_TWIST_IDX] =
+    clampf(hw_commands_[WRIST_TWIST_IDX], -1.57, 1.57);
+
+  hw_commands_[CLAW_IDX] =
+    clampf(hw_commands_[CLAW_IDX], -1.57, 1.57);
+
+  // Base stepper position target
   if (stepper_ && stepper_attached_)
   {
-    double velocity_cmd = hw_commands_[BASE_IDX];
-    velocity_cmd = clampf(velocity_cmd, -MAX_VELOCITY_RAD_S, MAX_VELOCITY_RAD_S);
-    double velocity_deg_s = velocity_cmd * 180.0 / M_PI;
-    
+    const double base_target_deg =
+      hw_commands_[BASE_IDX] * 180.0 / M_PI;
+
     phidget_ok(
-      PhidgetStepper_setVelocityLimit(stepper_, std::abs(velocity_deg_s)),
-      "setVelocityLimit");
-    
-    const double direction = (velocity_cmd >= 0) ? 1.0 : -1.0;
-    const double continuous_target = direction * 1e9;
-    phidget_ok(
-      PhidgetStepper_setTargetPosition(stepper_, continuous_target),
+      PhidgetStepper_setTargetPosition(
+        stepper_,
+        base_target_deg),
       "setTargetPosition");
-    
+
     int engaged = 0;
+
     if (phidget_ok(
-          PhidgetStepper_getEngaged(stepper_, &engaged),
-          "getEngaged"))
+          PhidgetStepper_getEngaged(
+            stepper_,
+            &engaged),
+          "getEngaged") &&
+        !engaged)
     {
-      if (!engaged && std::abs(velocity_cmd) > 0.01)
-      {
-        phidget_ok(
-          PhidgetStepper_setEngaged(stepper_, 1),
-          "setEngaged re-engage");
-      }
+      phidget_ok(
+        PhidgetStepper_setEngaged(
+          stepper_,
+          1),
+        "setEngaged re-engage");
     }
   }
 
-  // ========================================================================
-  // REAL HARDWARE: ESP32 (Shoulder Motor + Elbow Servo)
-  // ========================================================================
-  // Get shoulder command
-  const uint8_t shoulder_cmd = command_to_byte(hw_commands_[SHOULDER_IDX]);
-  
-  // Get servo command from elbow joint (convert rad to degrees)
-  double elbow_angle_rad = hw_commands_[ELBOW_IDX];
-  double servo_angle_deg = angle_to_servo_byte(elbow_angle_rad);
-  
-  // Update servo state (for feedback)
-  servo_current_angle_deg_ = servo_angle_deg;
-  
-  // Send combined packet to ESP32
+  // Shoulder actuator moves toward the requested position
+  const double shoulder_error =
+    hw_commands_[SHOULDER_IDX] -
+    hw_states_[SHOULDER_IDX];
+
+  const uint8_t shoulder_cmd =
+    command_to_byte(shoulder_error);
+
+  // Elbow position maps from [-1.57, 1.57] rad to [0, 180] degrees
+  const double servo_angle_deg =
+    angle_to_servo_byte(
+      hw_commands_[ELBOW_IDX]);
+
+  servo_current_angle_deg_ =
+    servo_angle_deg;
+
   if (esp32_serial_fd_ >= 0)
   {
-    send_esp32_packet(shoulder_cmd, static_cast<uint8_t>(servo_angle_deg));
+    send_esp32_packet(
+      shoulder_cmd,
+      static_cast<uint8_t>(
+        std::lround(servo_angle_deg)));
   }
 
   return hardware_interface::return_type::OK;

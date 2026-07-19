@@ -1,0 +1,88 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-c81590d72c786c8b9d96.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.12"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					]
+				}
+			],
+			"name" : "",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "science_control",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "science_2026::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-science_2026-05fac296536d921b1522.json",
+					"name" : "science_2026",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "science_2026_keyboard_teleop::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-science_2026_keyboard_teleop-a1c1083938c1e8606383.json",
+					"name" : "science_2026_keyboard_teleop",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "science_control_uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-science_control_uninstall-58f24cb82e94e2174c15.json",
+					"name" : "science_control_uninstall",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-uninstall-d0d84cbdd39b0600c8a9.json",
+					"name" : "uninstall",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/ibrahim/tasc_science/build/science_control",
+		"source" : "/home/ibrahim/tasc_science/src/science_control"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}
