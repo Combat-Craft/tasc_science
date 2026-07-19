@@ -1,4 +1,4 @@
 /home/ibrahim/tasc_science/install/science_control/lib/libscience_2026.so
-/home/ibrahim/tasc_science/install/science_control/lib/science_control/science_2026_keyboard_teleop
+/home/ibrahim/tasc_science/install/science_control/lib/science_control/keyboard_teleop
 /home/ibrahim/tasc_science/install/science_control/share/science_control/cmake/export_science_controlExport.cmake
 /home/ibrahim/tasc_science/install/science_control/share/science_control/cmake/export_science_controlExport-noconfig.cmake

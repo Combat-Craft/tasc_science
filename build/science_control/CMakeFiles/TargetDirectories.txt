@@ -1,7 +1,7 @@
 /home/ibrahim/tasc_science/build/science_control/CMakeFiles/uninstall.dir
 /home/ibrahim/tasc_science/build/science_control/CMakeFiles/science_control_uninstall.dir
 /home/ibrahim/tasc_science/build/science_control/CMakeFiles/science_2026.dir
-/home/ibrahim/tasc_science/build/science_control/CMakeFiles/science_2026_keyboard_teleop.dir
+/home/ibrahim/tasc_science/build/science_control/CMakeFiles/keyboard_teleop.dir
 /home/ibrahim/tasc_science/build/science_control/CMakeFiles/test.dir
 /home/ibrahim/tasc_science/build/science_control/CMakeFiles/edit_cache.dir
 /home/ibrahim/tasc_science/build/science_control/CMakeFiles/rebuild_cache.dir

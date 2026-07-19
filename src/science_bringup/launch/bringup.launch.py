@@ -9,17 +9,11 @@ def generate_launch_description():
     description_share = FindPackageShare("science_description")
     control_share = FindPackageShare("science_control")
 
-    robot_description_content = ParameterValue(
-        Command([
-            "xacro ",
-            PathJoinSubstitution([
-                description_share,
-                "urdf",
-                "science_2026.urdf.xacro",
-            ]),
-        ]),
-        value_type=str,
-    )
+    urdf_file = PathJoinSubstitution([
+        description_share,
+        "urdf",
+        "science_2026.urdf.xacro",
+    ])
 
     controller_config = PathJoinSubstitution([
         control_share,
@@ -27,11 +21,21 @@ def generate_launch_description():
         "controllers.yaml",
     ])
 
+    robot_description = ParameterValue(
+        Command([
+            "xacro ",
+            urdf_file,
+        ]),
+        value_type=str,
+    )
+
     control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
         parameters=[
-            {"robot_description": robot_description_content},
+            {
+                "robot_description": robot_description,
+            },
             controller_config,
         ],
         output="screen",
@@ -41,26 +45,10 @@ def generate_launch_description():
         package="robot_state_publisher",
         executable="robot_state_publisher",
         parameters=[
-            {"robot_description": robot_description_content}
+            {
+                "robot_description": robot_description,
+            }
         ],
-        output="screen",
-    )
-
-    rviz_node = Node(
-        package="rviz2",
-        executable="rviz2",
-        output="screen",
-    )
-
-    joy_node = Node(
-        package="joy",
-        executable="joy_node",
-        name="joy_node",
-        parameters=[{
-            "dev": "/dev/input/js0",
-            "deadzone": 0.05,
-            "autorepeat_rate": 20.0,
-        }],
         output="screen",
     )
 
@@ -71,26 +59,49 @@ def generate_launch_description():
             "joint_state_broadcaster",
             "--controller-manager",
             "/controller_manager",
+            "--controller-manager-timeout",
+            "20",
         ],
         output="screen",
     )
 
-    position_controller_spawner = Node(
+    science_velocity_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
         arguments=[
-            "position_controller",
+            "science_velocity_controller",
             "--controller-manager",
             "/controller_manager",
+            "--controller-manager-timeout",
+            "20",
         ],
+        output="screen",
+    )
+
+    beaker_position_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "beaker_position_controller",
+            "--controller-manager",
+            "/controller_manager",
+            "--controller-manager-timeout",
+            "20",
+        ],
+        output="screen",
+    )
+
+    rviz_node = Node(
+        package="rviz2",
+        executable="rviz2",
         output="screen",
     )
 
     return LaunchDescription([
         control_node,
         robot_state_publisher_node,
-        rviz_node,
-        joy_node,
         joint_state_broadcaster_spawner,
-        position_controller_spawner,
+        science_velocity_controller_spawner,
+        beaker_position_controller_spawner,
+        rviz_node,
     ])

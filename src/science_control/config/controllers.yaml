@@ -5,17 +5,21 @@ controller_manager:
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
 
-    position_controller:
-      type: forward_command_controller/ForwardCommandController
+    science_velocity_controller:
+      type: velocity_controllers/JointGroupVelocityController
 
-position_controller:
+    beaker_position_controller:
+      type: position_controllers/JointGroupPositionController
+
+
+science_velocity_controller:
   ros__parameters:
     joints:
-      - base_yaw
-      - shoulder_extension
-      - elbow_extension
-      - wrist_roll
-      - wrist_twist
-      - claw
+      - science_lift_joint
+      - auger_spin_joint
 
-    interface_name: position
+
+beaker_position_controller:
+  ros__parameters:
+    joints:
+      - beaker_tray_joint
