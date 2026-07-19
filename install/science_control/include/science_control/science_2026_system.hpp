@@ -1,1 +1,0 @@
-/home/ibrahim/tasc_science/src/science_control/include/science_control/science_2026_system.hpp

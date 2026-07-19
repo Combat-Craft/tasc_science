@@ -1,9 +1,0 @@
-/home/ibrahim/tasc_science/build/science_description/CMakeFiles/uninstall.dir
-/home/ibrahim/tasc_science/build/science_description/CMakeFiles/science_description_uninstall.dir
-/home/ibrahim/tasc_science/build/science_description/CMakeFiles/test.dir
-/home/ibrahim/tasc_science/build/science_description/CMakeFiles/edit_cache.dir
-/home/ibrahim/tasc_science/build/science_description/CMakeFiles/rebuild_cache.dir
-/home/ibrahim/tasc_science/build/science_description/CMakeFiles/list_install_components.dir
-/home/ibrahim/tasc_science/build/science_description/CMakeFiles/install.dir
-/home/ibrahim/tasc_science/build/science_description/CMakeFiles/install/local.dir
-/home/ibrahim/tasc_science/build/science_description/CMakeFiles/install/strip.dir

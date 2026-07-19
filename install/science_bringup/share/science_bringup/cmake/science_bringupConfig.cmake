@@ -1,1 +1,0 @@
-/home/ibrahim/tasc_science/build/science_bringup/ament_cmake_core/science_bringupConfig.cmake
