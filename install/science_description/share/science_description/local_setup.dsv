@@ -1,2 +1,1 @@
-source;share/science_description/environment/ament_prefix_path.sh
-source;share/science_description/environment/path.sh
+/home/ibrahim/tasc_science/build/science_description/ament_cmake_environment_hooks/local_setup.dsv

@@ -1,0 +1,72 @@
+-- The C compiler identification is GNU 11.4.0
+-- The CXX compiler identification is GNU 11.4.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found ament_cmake: 1.3.12 (/opt/ros/humble/share/ament_cmake/cmake)
+-- Found Python3: /usr/bin/python3 (found version "3.10.12") found components: Interpreter 
+-- Override CMake install command with custom implementation using symlinks instead of copying resources
+-- Found rclcpp: 16.0.14 (/opt/ros/humble/share/rclcpp/cmake)
+-- Found rosidl_generator_c: 3.1.7 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+-- Found rosidl_adapter: 3.1.7 (/opt/ros/humble/share/rosidl_adapter/cmake)
+-- Found rosidl_generator_cpp: 3.1.7 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+-- Found rmw_implementation_cmake: 6.1.2 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)
+-- Found rmw_cyclonedds_cpp: 1.3.4 (/opt/ros/humble/share/rmw_cyclonedds_cpp/cmake)
+-- Using RMW implementation 'rmw_cyclonedds_cpp' as default
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Found rclcpp_lifecycle: 16.0.14 (/opt/ros/humble/share/rclcpp_lifecycle/cmake)
+-- Found hardware_interface: 2.51.0 (/opt/ros/humble/share/hardware_interface/cmake)
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/ibrahim/tasc_science/build/science_control
+[ 25%] [32mBuilding CXX object CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.o[0m
+[ 50%] [32mBuilding CXX object CMakeFiles/science_2026.dir/src/science_2026_system.cpp.o[0m
+[ 75%] [32m[1mLinking CXX shared library libscience_2026.so[0m
+[ 75%] Built target science_2026
+[100%] [32m[1mLinking CXX executable science_2026_keyboard_teleop[0m
+[100%] Built target science_2026_keyboard_teleop
+-- Install configuration: ""
+-- Execute custom install script
+-- Symlinking: /home/ibrahim/tasc_science/install/science_control/share/science_control//plugin.xml
+-- Symlinking: /home/ibrahim/tasc_science/install/science_control/include/science_control/science_2026_system.hpp
+-- Symlinking: /home/ibrahim/tasc_science/install/science_control/share/science_control/config/controllers.yaml
+-- Up-to-date symlink: /home/ibrahim/tasc_science/install/science_control/share/science_control/plugin.xml
+-- Symlinking: /home/ibrahim/tasc_science/install/science_control/share/science_control/environment/library_path.sh
+-- Symlinking: /home/ibrahim/tasc_science/install/science_control/share/science_control/environment/library_path.dsv
+-- Symlinking: /home/ibrahim/tasc_science/install/science_control/share/ament_index/resource_index/package_run_dependencies/science_control
+-- Symlinking: /home/ibrahim/tasc_science/install/science_control/share/ament_index/resource_index/parent_prefix_path/science_control
+-- Symlinking: /home/ibrahim/tasc_science/install/science_control/share/science_control/environment/ament_prefix_path.sh
+-- Symlinking: /home/ibrahim/tasc_science/install/science_control/share/science_control/environment/ament_prefix_path.dsv
+-- Symlinking: /home/ibrahim/tasc_science/install/science_control/share/science_control/environment/path.sh
+-- Symlinking: /home/ibrahim/tasc_science/install/science_control/share/science_control/environment/path.dsv
+-- Symlinking: /home/ibrahim/tasc_science/install/science_control/share/science_control/local_setup.bash
+-- Symlinking: /home/ibrahim/tasc_science/install/science_control/share/science_control/local_setup.sh
+-- Symlinking: /home/ibrahim/tasc_science/install/science_control/share/science_control/local_setup.zsh
+-- Symlinking: /home/ibrahim/tasc_science/install/science_control/share/science_control/local_setup.dsv
+-- Symlinking: /home/ibrahim/tasc_science/install/science_control/share/science_control/package.dsv
+-- Symlinking: /home/ibrahim/tasc_science/install/science_control/share/ament_index/resource_index/packages/science_control
+-- Symlinking: /home/ibrahim/tasc_science/install/science_control/share/ament_index/resource_index/hardware_interface__pluginlib__plugin/science_control
+-- Symlinking: /home/ibrahim/tasc_science/install/science_control/share/science_control/cmake/ament_cmake_export_targets-extras.cmake
+-- Symlinking: /home/ibrahim/tasc_science/install/science_control/share/science_control/cmake/ament_cmake_export_dependencies-extras.cmake
+-- Symlinking: /home/ibrahim/tasc_science/install/science_control/share/science_control/cmake/science_controlConfig.cmake
+-- Symlinking: /home/ibrahim/tasc_science/install/science_control/share/science_control/cmake/science_controlConfig-version.cmake
+-- Symlinking: /home/ibrahim/tasc_science/install/science_control/share/science_control/package.xml
+-- Installing: /home/ibrahim/tasc_science/install/science_control/lib/libscience_2026.so
+-- Set runtime path of "/home/ibrahim/tasc_science/install/science_control/lib/libscience_2026.so" to ""
+-- Installing: /home/ibrahim/tasc_science/install/science_control/lib/science_control/science_2026_keyboard_teleop
+-- Set runtime path of "/home/ibrahim/tasc_science/install/science_control/lib/science_control/science_2026_keyboard_teleop" to ""
+-- Installing: /home/ibrahim/tasc_science/install/science_control/share/science_control/cmake/export_science_controlExport.cmake
+-- Installing: /home/ibrahim/tasc_science/install/science_control/share/science_control/cmake/export_science_controlExport-noconfig.cmake

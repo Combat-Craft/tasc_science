@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/rida/tasc_science/src/science_description
+CMAKE_SOURCE_DIR = /home/ibrahim/tasc_science/src/science_description
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/rida/tasc_science/build/science_description
+CMAKE_BINARY_DIR = /home/ibrahim/tasc_science/build/science_description
 
 # Utility rule file for uninstall.
 
@@ -78,6 +78,6 @@ CMakeFiles/uninstall.dir/clean:
 .PHONY : CMakeFiles/uninstall.dir/clean
 
 CMakeFiles/uninstall.dir/depend:
-	cd /home/rida/tasc_science/build/science_description && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/rida/tasc_science/src/science_description /home/rida/tasc_science/src/science_description /home/rida/tasc_science/build/science_description /home/rida/tasc_science/build/science_description /home/rida/tasc_science/build/science_description/CMakeFiles/uninstall.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ibrahim/tasc_science/build/science_description && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ibrahim/tasc_science/src/science_description /home/ibrahim/tasc_science/src/science_description /home/ibrahim/tasc_science/build/science_description /home/ibrahim/tasc_science/build/science_description /home/ibrahim/tasc_science/build/science_description/CMakeFiles/uninstall.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/uninstall.dir/depend
 

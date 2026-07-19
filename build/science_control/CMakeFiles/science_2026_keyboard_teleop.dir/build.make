@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/rida/tasc_science/src/science_control
+CMAKE_SOURCE_DIR = /home/ibrahim/tasc_science/src/science_control
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/rida/tasc_science/build/science_control
+CMAKE_BINARY_DIR = /home/ibrahim/tasc_science/build/science_control
 
 # Include any dependencies generated for this target.
 include CMakeFiles/science_2026_keyboard_teleop.dir/depend.make
@@ -70,18 +70,18 @@ include CMakeFiles/science_2026_keyboard_teleop.dir/progress.make
 include CMakeFiles/science_2026_keyboard_teleop.dir/flags.make
 
 CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.o: CMakeFiles/science_2026_keyboard_teleop.dir/flags.make
-CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.o: /home/rida/tasc_science/src/science_control/teleop/science_2026_keyboard_teleop.cpp
+CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.o: /home/ibrahim/tasc_science/src/science_control/teleop/science_2026_keyboard_teleop.cpp
 CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.o: CMakeFiles/science_2026_keyboard_teleop.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/rida/tasc_science/build/science_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.o -MF CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.o.d -o CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.o -c /home/rida/tasc_science/src/science_control/teleop/science_2026_keyboard_teleop.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ibrahim/tasc_science/build/science_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.o -MF CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.o.d -o CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.o -c /home/ibrahim/tasc_science/src/science_control/teleop/science_2026_keyboard_teleop.cpp
 
 CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/rida/tasc_science/src/science_control/teleop/science_2026_keyboard_teleop.cpp > CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ibrahim/tasc_science/src/science_control/teleop/science_2026_keyboard_teleop.cpp > CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.i
 
 CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/rida/tasc_science/src/science_control/teleop/science_2026_keyboard_teleop.cpp -o CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ibrahim/tasc_science/src/science_control/teleop/science_2026_keyboard_teleop.cpp -o CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.s
 
 # Object files for target science_2026_keyboard_teleop
 science_2026_keyboard_teleop_OBJECTS = \
@@ -171,7 +171,7 @@ science_2026_keyboard_teleop: /opt/ros/humble/lib/librcpputils.so
 science_2026_keyboard_teleop: /opt/ros/humble/lib/librosidl_runtime_c.so
 science_2026_keyboard_teleop: /opt/ros/humble/lib/librcutils.so
 science_2026_keyboard_teleop: CMakeFiles/science_2026_keyboard_teleop.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/rida/tasc_science/build/science_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable science_2026_keyboard_teleop"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ibrahim/tasc_science/build/science_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable science_2026_keyboard_teleop"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/science_2026_keyboard_teleop.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -183,6 +183,6 @@ CMakeFiles/science_2026_keyboard_teleop.dir/clean:
 .PHONY : CMakeFiles/science_2026_keyboard_teleop.dir/clean
 
 CMakeFiles/science_2026_keyboard_teleop.dir/depend:
-	cd /home/rida/tasc_science/build/science_control && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/rida/tasc_science/src/science_control /home/rida/tasc_science/src/science_control /home/rida/tasc_science/build/science_control /home/rida/tasc_science/build/science_control /home/rida/tasc_science/build/science_control/CMakeFiles/science_2026_keyboard_teleop.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ibrahim/tasc_science/build/science_control && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ibrahim/tasc_science/src/science_control /home/ibrahim/tasc_science/src/science_control /home/ibrahim/tasc_science/build/science_control /home/ibrahim/tasc_science/build/science_control /home/ibrahim/tasc_science/build/science_control/CMakeFiles/science_2026_keyboard_teleop.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/science_2026_keyboard_teleop.dir/depend
 

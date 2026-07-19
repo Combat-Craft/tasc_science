@@ -4,7 +4,6 @@
 #include <chrono>
 #include <cmath>
 #include <thread>
-#include <utility>
 
 #include <cerrno>
 #include <cstring>
@@ -18,28 +17,45 @@
 namespace science_2026
 {
 
-// ============================================================================
+namespace
+{
+
+constexpr double PI = 3.14159265358979323846;
+
+}  // namespace
+
+// =============================================================================
 // DESTRUCTOR
-// ============================================================================
+// =============================================================================
+
 Science2026System::~Science2026System()
 {
+  // Stop the actuator and preserve the most recently selected tray position.
+  if (esp32_serial_fd_ >= 0)
+  {
+    send_esp32_packet(ACT_STOP, last_tray_servo_byte_);
+  }
+
   cleanup_phidgets();
   close_esp32_serial();
 }
 
-// ============================================================================
+// =============================================================================
 // INITIALIZATION
-// ============================================================================
+// =============================================================================
+
 hardware_interface::CallbackReturn Science2026System::on_init(
   const hardware_interface::HardwareInfo & info)
 {
-  if (hardware_interface::SystemInterface::on_init(info) !=
-      hardware_interface::CallbackReturn::SUCCESS)
+  if (
+    hardware_interface::SystemInterface::on_init(info) !=
+    hardware_interface::CallbackReturn::SUCCESS)
   {
     return hardware_interface::CallbackReturn::ERROR;
   }
 
   joint_names_.clear();
+
   for (const auto & joint : info_.joints)
   {
     joint_names_.push_back(joint.name);
@@ -49,85 +65,287 @@ hardware_interface::CallbackReturn Science2026System::on_init(
   {
     RCLCPP_ERROR(
       rclcpp::get_logger("Science2026System"),
-      "Expected %zu joints, got %zu",
+      "Expected %zu joints, but received %zu.",
       NUM_JOINTS,
       joint_names_.size());
+
     return hardware_interface::CallbackReturn::ERROR;
   }
 
-  if (joint_names_[BASE_IDX] != "base_yaw" ||
-      joint_names_[SHOULDER_IDX] != "shoulder_extension" ||
-      joint_names_[ELBOW_IDX] != "elbow_extension" ||
-      joint_names_[WRIST_ROLL_IDX] != "wrist_roll" ||
-      joint_names_[WRIST_TWIST_IDX] != "wrist_twist" ||
-      joint_names_[CLAW_IDX] != "claw")
+  if (
+    joint_names_[LIFT_IDX] != LIFT_JOINT_NAME ||
+    joint_names_[AUGER_IDX] != AUGER_JOINT_NAME ||
+    joint_names_[TRAY_IDX] != TRAY_JOINT_NAME)
   {
     RCLCPP_ERROR(
       rclcpp::get_logger("Science2026System"),
-      "Joint order mismatch. Expected [base_yaw, shoulder_extension, elbow_extension, wrist_roll, wrist_twist, claw].");
+      "Joint order mismatch. Expected [%s, %s, %s], but received [%s, %s, %s].",
+      LIFT_JOINT_NAME,
+      AUGER_JOINT_NAME,
+      TRAY_JOINT_NAME,
+      joint_names_[LIFT_IDX].c_str(),
+      joint_names_[AUGER_IDX].c_str(),
+      joint_names_[TRAY_IDX].c_str());
+
     return hardware_interface::CallbackReturn::ERROR;
   }
 
-  hw_commands_.assign(NUM_JOINTS, 0.0);
-  hw_states_.assign(NUM_JOINTS, 0.0);
+  // Verify the interfaces declared in the URDF.
+  const auto & lift_joint = info_.joints[LIFT_IDX];
+  const auto & auger_joint = info_.joints[AUGER_IDX];
+  const auto & tray_joint = info_.joints[TRAY_IDX];
+
+  if (
+    lift_joint.command_interfaces.size() != 1 ||
+    lift_joint.command_interfaces[0].name !=
+    hardware_interface::HW_IF_VELOCITY)
+  {
+    RCLCPP_ERROR(
+      rclcpp::get_logger("Science2026System"),
+      "%s must have exactly one velocity command interface.",
+      LIFT_JOINT_NAME);
+
+    return hardware_interface::CallbackReturn::ERROR;
+  }
+
+  if (
+    auger_joint.command_interfaces.size() != 1 ||
+    auger_joint.command_interfaces[0].name !=
+    hardware_interface::HW_IF_VELOCITY)
+  {
+    RCLCPP_ERROR(
+      rclcpp::get_logger("Science2026System"),
+      "%s must have exactly one velocity command interface.",
+      AUGER_JOINT_NAME);
+
+    return hardware_interface::CallbackReturn::ERROR;
+  }
+
+  if (
+    tray_joint.command_interfaces.size() != 1 ||
+    tray_joint.command_interfaces[0].name !=
+    hardware_interface::HW_IF_POSITION)
+  {
+    RCLCPP_ERROR(
+      rclcpp::get_logger("Science2026System"),
+      "%s must have exactly one position command interface.",
+      TRAY_JOINT_NAME);
+
+    return hardware_interface::CallbackReturn::ERROR;
+  }
+
+  if (
+    lift_joint.state_interfaces.size() != 1 ||
+    lift_joint.state_interfaces[0].name !=
+    hardware_interface::HW_IF_POSITION)
+  {
+    RCLCPP_ERROR(
+      rclcpp::get_logger("Science2026System"),
+      "%s must have exactly one position state interface.",
+      LIFT_JOINT_NAME);
+
+    return hardware_interface::CallbackReturn::ERROR;
+  }
+
+  if (
+    auger_joint.state_interfaces.size() != 1 ||
+    auger_joint.state_interfaces[0].name !=
+    hardware_interface::HW_IF_POSITION)
+  {
+    RCLCPP_ERROR(
+      rclcpp::get_logger("Science2026System"),
+      "%s must have exactly one position state interface.",
+      AUGER_JOINT_NAME);
+
+    return hardware_interface::CallbackReturn::ERROR;
+  }
+
+  if (
+    tray_joint.state_interfaces.size() != 1 ||
+    tray_joint.state_interfaces[0].name !=
+    hardware_interface::HW_IF_POSITION)
+  {
+    RCLCPP_ERROR(
+      rclcpp::get_logger("Science2026System"),
+      "%s must have exactly one position state interface.",
+      TRAY_JOINT_NAME);
+
+    return hardware_interface::CallbackReturn::ERROR;
+  }
+
+  // Read optional hardware parameters from the URDF.
+  const auto serial_device_it =
+    info_.hardware_parameters.find("esp32_serial_device");
+
+  if (serial_device_it != info_.hardware_parameters.end())
+  {
+    esp32_serial_device_ = serial_device_it->second;
+  }
+
+  const auto phidget_serial_it =
+    info_.hardware_parameters.find("phidget_serial");
+
+  if (phidget_serial_it != info_.hardware_parameters.end())
+  {
+    try
+    {
+      device_serial_ = std::stoi(phidget_serial_it->second);
+    }
+    catch (const std::exception & exception)
+    {
+      RCLCPP_ERROR(
+        rclcpp::get_logger("Science2026System"),
+        "Invalid phidget_serial value '%s': %s",
+        phidget_serial_it->second.c_str(),
+        exception.what());
+
+      return hardware_interface::CallbackReturn::ERROR;
+    }
+  }
+
+  const auto hub_port_it =
+    info_.hardware_parameters.find("phidget_hub_port");
+
+  if (hub_port_it != info_.hardware_parameters.end())
+  {
+    try
+    {
+      hub_port_ = std::stoi(hub_port_it->second);
+    }
+    catch (const std::exception & exception)
+    {
+      RCLCPP_ERROR(
+        rclcpp::get_logger("Science2026System"),
+        "Invalid phidget_hub_port value '%s': %s",
+        hub_port_it->second.c_str(),
+        exception.what());
+
+      return hardware_interface::CallbackReturn::ERROR;
+    }
+  }
+
+  const auto channel_it =
+    info_.hardware_parameters.find("phidget_channel");
+
+  if (channel_it != info_.hardware_parameters.end())
+  {
+    try
+    {
+      channel_ = std::stoi(channel_it->second);
+    }
+    catch (const std::exception & exception)
+    {
+      RCLCPP_ERROR(
+        rclcpp::get_logger("Science2026System"),
+        "Invalid phidget_channel value '%s': %s",
+        channel_it->second.c_str(),
+        exception.what());
+
+      return hardware_interface::CallbackReturn::ERROR;
+    }
+  }
+
+  lift_velocity_command_ = 0.0;
+  auger_velocity_command_ = 0.0;
+  tray_position_command_ = TRAY_POSITION_0_RAD;
+
+  lift_position_state_ = 0.0;
+  auger_position_state_ = 0.0;
+  tray_position_state_ = TRAY_POSITION_0_RAD;
+
+  last_lift_command_byte_ = ACT_STOP;
+  last_tray_servo_byte_ = 0;
+  last_auger_velocity_command_ = 0.0;
+
+  hardware_active_ = false;
+
+  RCLCPP_INFO(
+    rclcpp::get_logger("Science2026System"),
+    "Science hardware interface initialized with three joints.");
 
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
-// ============================================================================
-// EXPORT STATE INTERFACES
-// ============================================================================
-std::vector<hardware_interface::StateInterface> Science2026System::export_state_interfaces()
+// =============================================================================
+// STATE INTERFACES
+// =============================================================================
+
+std::vector<hardware_interface::StateInterface>
+Science2026System::export_state_interfaces()
 {
   std::vector<hardware_interface::StateInterface> state_interfaces;
-  state_interfaces.reserve(NUM_JOINTS);
 
-  for (std::size_t i = 0; i < NUM_JOINTS; ++i)
-  {
-    state_interfaces.emplace_back(
-      joint_names_[i],
-      hardware_interface::HW_IF_POSITION,
-      &hw_states_[i]);
-  }
+  state_interfaces.reserve(3);
+
+  state_interfaces.emplace_back(
+    LIFT_JOINT_NAME,
+    hardware_interface::HW_IF_POSITION,
+    &lift_position_state_);
+
+  state_interfaces.emplace_back(
+    AUGER_JOINT_NAME,
+    hardware_interface::HW_IF_POSITION,
+    &auger_position_state_);
+
+  state_interfaces.emplace_back(
+    TRAY_JOINT_NAME,
+    hardware_interface::HW_IF_POSITION,
+    &tray_position_state_);
 
   return state_interfaces;
 }
 
-// ============================================================================
-// EXPORT COMMAND INTERFACES
-// ============================================================================
-std::vector<hardware_interface::CommandInterface> Science2026System::export_command_interfaces()
+// =============================================================================
+// COMMAND INTERFACES
+// =============================================================================
+
+std::vector<hardware_interface::CommandInterface>
+Science2026System::export_command_interfaces()
 {
   std::vector<hardware_interface::CommandInterface> command_interfaces;
-  command_interfaces.reserve(NUM_JOINTS);
 
-  for (std::size_t i = 0; i < NUM_JOINTS; ++i)
-  {
-    command_interfaces.emplace_back(
-      joint_names_[i],
-      hardware_interface::HW_IF_POSITION,
-      &hw_commands_[i]);
-  }
+  command_interfaces.reserve(3);
+
+  command_interfaces.emplace_back(
+    LIFT_JOINT_NAME,
+    hardware_interface::HW_IF_VELOCITY,
+    &lift_velocity_command_);
+
+  command_interfaces.emplace_back(
+    AUGER_JOINT_NAME,
+    hardware_interface::HW_IF_VELOCITY,
+    &auger_velocity_command_);
+
+  command_interfaces.emplace_back(
+    TRAY_JOINT_NAME,
+    hardware_interface::HW_IF_POSITION,
+    &tray_position_command_);
 
   return command_interfaces;
 }
 
-// ============================================================================
-// HELPER FUNCTIONS
-// ============================================================================
-double Science2026System::clampf(double x, double lo, double hi) const
+// =============================================================================
+// GENERAL HELPERS
+// =============================================================================
+
+double Science2026System::clamp_value(
+  double value,
+  double minimum,
+  double maximum) const
 {
-  return std::clamp(x, lo, hi);
+  return std::clamp(value, minimum, maximum);
 }
 
-bool Science2026System::phidget_ok(PhidgetReturnCode code, const char * context) const
+bool Science2026System::phidget_ok(
+  PhidgetReturnCode code,
+  const char * context) const
 {
   if (code == EPHIDGET_OK)
   {
     return true;
   }
 
-  const char * error_description = "Unknown error";
+  const char * error_description = "Unknown Phidget error";
   Phidget_getErrorDescription(code, &error_description);
 
   RCLCPP_ERROR(
@@ -139,21 +357,18 @@ bool Science2026System::phidget_ok(PhidgetReturnCode code, const char * context)
   return false;
 }
 
-// ============================================================================
-// REAL HARDWARE: ESP32 (Shoulder Motor + Elbow Servo)
-// Opens serial connection
-// ============================================================================
+// =============================================================================
+// ESP32 SERIAL
+// =============================================================================
+
 bool Science2026System::open_esp32_serial()
 {
   close_esp32_serial();
 
-  const int max_attempts = 3;
-  int attempt = 0;
-  
-  while (attempt < max_attempts)
+  constexpr int MAX_ATTEMPTS = 3;
+
+  for (int attempt = 1; attempt <= MAX_ATTEMPTS; ++attempt)
   {
-    attempt++;
-    
     esp32_serial_fd_ = ::open(
       esp32_serial_device_.c_str(),
       O_RDWR | O_NOCTTY | O_SYNC);
@@ -163,9 +378,10 @@ bool Science2026System::open_esp32_serial()
       break;
     }
 
-    if (attempt < max_attempts)
+    if (attempt < MAX_ATTEMPTS)
     {
-      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+      std::this_thread::sleep_for(
+        std::chrono::milliseconds(500));
     }
   }
 
@@ -173,32 +389,36 @@ bool Science2026System::open_esp32_serial()
   {
     RCLCPP_WARN(
       rclcpp::get_logger("Science2026System"),
-      "ESP32 not found on %s after %d attempts. Running without it.",
-      esp32_serial_device_.c_str(),
-      max_attempts);
+      "ESP32 was not found on %s. Continuing without ESP32 hardware.",
+      esp32_serial_device_.c_str());
+
+    esp32_connected_ = false;
     return false;
   }
 
   termios tty{};
+
   if (tcgetattr(esp32_serial_fd_, &tty) != 0)
   {
     RCLCPP_ERROR(
       rclcpp::get_logger("Science2026System"),
-      "tcgetattr failed on %s",
-      esp32_serial_device_.c_str());
+      "tcgetattr failed for %s: %s",
+      esp32_serial_device_.c_str(),
+      std::strerror(errno));
+
     close_esp32_serial();
     return false;
   }
 
   cfmakeraw(&tty);
 
-  speed_t baud = B115200;
-  cfsetispeed(&tty, baud);
-  cfsetospeed(&tty, baud);
+  cfsetispeed(&tty, B115200);
+  cfsetospeed(&tty, B115200);
 
-  tty.c_cflag |= (CLOCAL | CREAD);
-  tty.c_cflag &= ~CSTOPB;
-  tty.c_cflag &= ~CRTSCTS;
+  tty.c_cflag |= CLOCAL | CREAD;
+  tty.c_cflag &= static_cast<tcflag_t>(~CSTOPB);
+  tty.c_cflag &= static_cast<tcflag_t>(~CRTSCTS);
+
   tty.c_cc[VMIN] = 0;
   tty.c_cc[VTIME] = 0;
 
@@ -206,26 +426,26 @@ bool Science2026System::open_esp32_serial()
   {
     RCLCPP_ERROR(
       rclcpp::get_logger("Science2026System"),
-      "tcsetattr failed on %s",
-      esp32_serial_device_.c_str());
+      "tcsetattr failed for %s: %s",
+      esp32_serial_device_.c_str(),
+      std::strerror(errno));
+
     close_esp32_serial();
     return false;
   }
 
   tcflush(esp32_serial_fd_, TCIOFLUSH);
 
+  esp32_connected_ = true;
+
   RCLCPP_INFO(
     rclcpp::get_logger("Science2026System"),
-    "ESP32 connected on %s (Shoulder Motor + Elbow Servo)",
+    "ESP32 connected on %s at 115200 baud.",
     esp32_serial_device_.c_str());
 
   return true;
 }
 
-// ============================================================================
-// REAL HARDWARE: ESP32
-// Closes serial connection
-// ============================================================================
 void Science2026System::close_esp32_serial()
 {
   if (esp32_serial_fd_ >= 0)
@@ -233,41 +453,13 @@ void Science2026System::close_esp32_serial()
     ::close(esp32_serial_fd_);
     esp32_serial_fd_ = -1;
   }
+
+  esp32_connected_ = false;
 }
 
-// ============================================================================
-// REAL HARDWARE: Linear Actuator (shoulder)
-// Converts position command to byte command
-// ============================================================================
-uint8_t Science2026System::command_to_byte(double value) const
-{
-  if (value > actuator_command_deadband_)
-  {
-    return ACT_EXTEND;
-  }
-  if (value < -actuator_command_deadband_)
-  {
-    return ACT_RETRACT;
-  }
-  return ACT_STOP;
-}
-
-// ============================================================================
-// REAL HARDWARE: Servo (elbow)
-// Convert angle (rad) to servo byte (0-180)
-// ============================================================================
-double Science2026System::angle_to_servo_byte(double angle_rad) const
-{
-  double angle_deg = angle_rad * 180.0 / M_PI;
-  angle_deg = clampf(angle_deg, 0.0, 180.0);
-  return angle_deg;
-}
-
-// ============================================================================
-// REAL HARDWARE: ESP32
-// Sends combined packet: [0xAA] [Shoulder_CMD] [Servo_Angle] [Checksum]
-// ============================================================================
-bool Science2026System::send_esp32_packet(uint8_t shoulder_cmd, uint8_t servo_angle)
+bool Science2026System::send_esp32_packet(
+  uint8_t lift_command,
+  uint8_t tray_angle_degrees)
 {
   if (esp32_serial_fd_ < 0)
   {
@@ -275,311 +467,608 @@ bool Science2026System::send_esp32_packet(uint8_t shoulder_cmd, uint8_t servo_an
   }
 
   const uint8_t header = 0xAA;
-  const uint8_t checksum = shoulder_cmd ^ servo_angle;
-  const uint8_t packet[4] = {header, shoulder_cmd, servo_angle, checksum};
+  const uint8_t checksum =
+    static_cast<uint8_t>(lift_command ^ tray_angle_degrees);
 
-  const ssize_t written = ::write(esp32_serial_fd_, packet, sizeof(packet));
+  const uint8_t packet[4] = {
+    header,
+    lift_command,
+    tray_angle_degrees,
+    checksum
+  };
 
-  if (written != static_cast<ssize_t>(sizeof(packet)))
+  std::size_t total_written = 0;
+
+  while (total_written < sizeof(packet))
   {
+    const ssize_t bytes_written = ::write(
+      esp32_serial_fd_,
+      packet + total_written,
+      sizeof(packet) - total_written);
+
+    if (bytes_written > 0)
+    {
+      total_written += static_cast<std::size_t>(bytes_written);
+      continue;
+    }
+
+    if (bytes_written < 0 && errno == EINTR)
+    {
+      continue;
+    }
+
+    RCLCPP_WARN(
+      rclcpp::get_logger("Science2026System"),
+      "Failed to write a complete packet to the ESP32: %s",
+      std::strerror(errno));
+
     return false;
   }
-
-  RCLCPP_DEBUG(
-    rclcpp::get_logger("Science2026System"),
-    "Sent ESP32 packet: 0x%02X 0x%02X 0x%02X 0x%02X (shoulder=%d, servo=%d°)",
-    packet[0], packet[1], packet[2], packet[3],
-    shoulder_cmd, servo_angle);
 
   return true;
 }
 
-// ============================================================================
-// REAL HARDWARE: Phidget Stepper Motor (base_yaw)
-// Cleans up stepper motor connection
-// ============================================================================
-void Science2026System::cleanup_phidgets()
+// =============================================================================
+// LINEAR ACTUATOR HELPERS
+// =============================================================================
+
+uint8_t Science2026System::lift_command_to_byte(
+  double velocity_command) const
 {
-  if (stepper_)
+  if (!std::isfinite(velocity_command))
   {
-    phidget_ok(PhidgetStepper_setEngaged(stepper_, 0), "setEngaged(0)");
-    phidget_ok(Phidget_close(reinterpret_cast<PhidgetHandle>(stepper_)), "close");
-    phidget_ok(PhidgetStepper_delete(&stepper_), "delete");
-    stepper_ = nullptr;
-    stepper_attached_ = false;
+    return ACT_STOP;
   }
+
+  if (velocity_command > actuator_command_deadband_)
+  {
+    return ACT_EXTEND;
+  }
+
+  if (velocity_command < -actuator_command_deadband_)
+  {
+    return ACT_RETRACT;
+  }
+
+  return ACT_STOP;
 }
 
-// ============================================================================
-// REAL HARDWARE: CONFIGURE PHASE
-// ============================================================================
+// =============================================================================
+// BEAKER TRAY HELPERS
+// =============================================================================
+
+double Science2026System::snap_tray_angle_radians(
+  double angle_radians) const
+{
+  if (!std::isfinite(angle_radians))
+  {
+    return TRAY_POSITION_0_RAD;
+  }
+
+  const double distance_to_zero =
+    std::fabs(angle_radians - TRAY_POSITION_0_RAD);
+
+  const double distance_to_ninety =
+    std::fabs(angle_radians - TRAY_POSITION_90_RAD);
+
+  const double distance_to_one_eighty =
+    std::fabs(angle_radians - TRAY_POSITION_180_RAD);
+
+  if (
+    distance_to_zero <= distance_to_ninety &&
+    distance_to_zero <= distance_to_one_eighty)
+  {
+    return TRAY_POSITION_0_RAD;
+  }
+
+  if (distance_to_ninety <= distance_to_one_eighty)
+  {
+    return TRAY_POSITION_90_RAD;
+  }
+
+  return TRAY_POSITION_180_RAD;
+}
+
+uint8_t Science2026System::tray_radians_to_servo_byte(
+  double angle_radians) const
+{
+  const double snapped_angle =
+    snap_tray_angle_radians(angle_radians);
+
+  const double angle_degrees =
+    snapped_angle * 180.0 / PI;
+
+  return static_cast<uint8_t>(
+    std::lround(
+      clamp_value(angle_degrees, 0.0, 180.0)));
+}
+
+// =============================================================================
+// PHIDGET CLEANUP
+// =============================================================================
+
+void Science2026System::cleanup_phidgets()
+{
+  if (stepper_ == nullptr)
+  {
+    stepper_attached_ = false;
+    return;
+  }
+
+  if (stepper_attached_)
+  {
+    // Stop continuous rotation before disengaging.
+    phidget_ok(
+      PhidgetStepper_setVelocityLimit(stepper_, 0.0),
+      "setVelocityLimit(0)");
+
+    phidget_ok(
+      PhidgetStepper_setEngaged(stepper_, 0),
+      "setEngaged(0)");
+  }
+
+  phidget_ok(
+    Phidget_close(
+      reinterpret_cast<PhidgetHandle>(stepper_)),
+    "close");
+
+  phidget_ok(
+    PhidgetStepper_delete(&stepper_),
+    "delete");
+
+  stepper_ = nullptr;
+  stepper_attached_ = false;
+}
+
+// =============================================================================
+// CONFIGURE
+// =============================================================================
+
 hardware_interface::CallbackReturn Science2026System::on_configure(
   const rclcpp_lifecycle::State &)
 {
-  // REAL HARDWARE #1: ESP32 (Shoulder Motor + Elbow Servo)
+  hardware_active_ = false;
+
+  // ESP32 is optional during development.
   open_esp32_serial();
 
-  // REAL HARDWARE #2: Phidget Stepper Motor (base_yaw)
-  if (!phidget_ok(PhidgetStepper_create(&stepper_), "create"))
-  {
-    return hardware_interface::CallbackReturn::ERROR;
-  }
+  // Phidget is also optional during development.
+  cleanup_phidgets();
 
   if (!phidget_ok(
-        Phidget_setDeviceSerialNumber(
-          reinterpret_cast<PhidgetHandle>(stepper_), device_serial_),
-        "setDeviceSerialNumber"))
+      PhidgetStepper_create(&stepper_),
+      "PhidgetStepper_create"))
   {
-    return hardware_interface::CallbackReturn::ERROR;
-  }
+    stepper_ = nullptr;
 
-  if (!phidget_ok(
-        Phidget_setHubPort(
-          reinterpret_cast<PhidgetHandle>(stepper_), hub_port_),
-        "setHubPort"))
-  {
-    return hardware_interface::CallbackReturn::ERROR;
-  }
-
-  if (!phidget_ok(
-        Phidget_setChannel(
-          reinterpret_cast<PhidgetHandle>(stepper_), channel_),
-        "setChannel"))
-  {
-    return hardware_interface::CallbackReturn::ERROR;
-  }
-
-  if (!phidget_ok(
-        Phidget_openWaitForAttachment(
-          reinterpret_cast<PhidgetHandle>(stepper_), 5000),
-        "openWaitForAttachment"))
-  {
     RCLCPP_WARN(
       rclcpp::get_logger("Science2026System"),
-      "Stepper not attached on hub port %d. Continuing in fake mode.",
-      hub_port_);
+      "Could not create the Phidget stepper handle. Continuing in fake mode.");
 
-    stepper_attached_ = false;
-    if (stepper_ != nullptr)
-    {
-      PhidgetStepper_delete(&stepper_);
-      stepper_ = nullptr;
-    }
+    return hardware_interface::CallbackReturn::SUCCESS;
   }
-  else
+
+  if (!phidget_ok(
+      Phidget_setDeviceSerialNumber(
+        reinterpret_cast<PhidgetHandle>(stepper_),
+        device_serial_),
+      "setDeviceSerialNumber"))
   {
-    if (!phidget_ok(
-          PhidgetStepper_setRescaleFactor(stepper_, rescale_factor_deg_),
-          "setRescaleFactor"))
-    {
-      return hardware_interface::CallbackReturn::ERROR;
-    }
-
-    stepper_attached_ = true;
-    
-    RCLCPP_INFO(
-      rclcpp::get_logger("Science2026System"),
-      "Stepper motor connected on serial %d, hub port %d",
-      device_serial_,
-      hub_port_);
+    cleanup_phidgets();
+    return hardware_interface::CallbackReturn::ERROR;
   }
+
+  if (!phidget_ok(
+      Phidget_setHubPort(
+        reinterpret_cast<PhidgetHandle>(stepper_),
+        hub_port_),
+      "setHubPort"))
+  {
+    cleanup_phidgets();
+    return hardware_interface::CallbackReturn::ERROR;
+  }
+
+  if (!phidget_ok(
+      Phidget_setChannel(
+        reinterpret_cast<PhidgetHandle>(stepper_),
+        channel_),
+      "setChannel"))
+  {
+    cleanup_phidgets();
+    return hardware_interface::CallbackReturn::ERROR;
+  }
+
+  const PhidgetReturnCode attachment_result =
+    Phidget_openWaitForAttachment(
+      reinterpret_cast<PhidgetHandle>(stepper_),
+      5000);
+
+  if (attachment_result != EPHIDGET_OK)
+  {
+    const char * error_description = "Unknown Phidget error";
+    Phidget_getErrorDescription(
+      attachment_result,
+      &error_description);
+
+    RCLCPP_WARN(
+      rclcpp::get_logger("Science2026System"),
+      "Phidget stepper did not attach on serial %d, hub port %d, channel %d: %s. "
+      "Continuing in fake mode.",
+      device_serial_,
+      hub_port_,
+      channel_,
+      error_description);
+
+    cleanup_phidgets();
+    return hardware_interface::CallbackReturn::SUCCESS;
+  }
+
+  stepper_attached_ = true;
+
+  if (!phidget_ok(
+      PhidgetStepper_setRescaleFactor(
+        stepper_,
+        rescale_factor_),
+      "setRescaleFactor"))
+  {
+    cleanup_phidgets();
+    return hardware_interface::CallbackReturn::ERROR;
+  }
+
+  RCLCPP_INFO(
+    rclcpp::get_logger("Science2026System"),
+    "Phidget auger stepper attached on serial %d, hub port %d, channel %d.",
+    device_serial_,
+    hub_port_,
+    channel_);
 
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
-// ============================================================================
-// REAL HARDWARE: ACTIVATE PHASE
-// ============================================================================
+// =============================================================================
+// ACTIVATE
+// =============================================================================
+
 hardware_interface::CallbackReturn Science2026System::on_activate(
   const rclcpp_lifecycle::State &)
 {
+  lift_velocity_command_ = 0.0;
+  auger_velocity_command_ = 0.0;
+
+  tray_position_command_ =
+    snap_tray_angle_radians(tray_position_command_);
+
+  last_lift_command_byte_ = ACT_STOP;
+  last_tray_servo_byte_ =
+    tray_radians_to_servo_byte(tray_position_command_);
+
+  last_auger_velocity_command_ = 0.0;
+
   if (esp32_serial_fd_ < 0)
   {
     open_esp32_serial();
   }
 
-  // ========================================================================
-  // REAL HARDWARE: Stepper Motor (base_yaw)
-  // ========================================================================
-  if (stepper_ && stepper_attached_)
+  if (esp32_connected_)
   {
-    if (!phidget_ok(
-          PhidgetStepper_setAcceleration(stepper_, acceleration_deg_),
-          "setAcceleration"))
-    {
-      return hardware_interface::CallbackReturn::ERROR;
-    }
-
-    if (!phidget_ok(
-          PhidgetStepper_setVelocityLimit(stepper_, velocity_limit_deg_),
-          "setVelocityLimit"))
-    {
-      return hardware_interface::CallbackReturn::ERROR;
-    }
-
-    if (!phidget_ok(
-          PhidgetStepper_setCurrentLimit(stepper_, MAX_CURRENT_A),
-          "setCurrentLimit"))
-    {
-      return hardware_interface::CallbackReturn::ERROR;
-    }
-
-    if (!phidget_ok(
-          PhidgetStepper_setEngaged(stepper_, 1),
-          "setEngaged"))
-    {
-      return hardware_interface::CallbackReturn::ERROR;
-    }
-
-    double pos_deg = 0.0;
-    if (!phidget_ok(
-          PhidgetStepper_getPosition(stepper_, &pos_deg),
-          "getPosition"))
-    {
-      return hardware_interface::CallbackReturn::ERROR;
-    }
-
-    hw_states_[BASE_IDX] = pos_deg * M_PI / 180.0;
-    hw_commands_[BASE_IDX] = hw_states_[BASE_IDX];
-
-    const double continuous_target = 1e9;
-    if (!phidget_ok(
-          PhidgetStepper_setTargetPosition(stepper_, continuous_target),
-          "setTargetPosition"))
-    {
-      return hardware_interface::CallbackReturn::ERROR;
-    }
-  }
-  else
-  {
-    hw_states_[BASE_IDX] = hw_commands_[BASE_IDX];
+    send_esp32_packet(
+      ACT_STOP,
+      last_tray_servo_byte_);
   }
 
-  // FAKE MOTORS: Initialize all other joints to 0
-  for (std::size_t i = 1; i < NUM_JOINTS; ++i)
+  if (stepper_ != nullptr && stepper_attached_)
   {
-    hw_states_[i] = 0.0;
-    hw_commands_[i] = 0.0;
+    /*
+     * The Phidget must be placed in Run Mode for continuous rotation.
+     * Control mode must be selected before engaging the controller.
+     */
+    if (!phidget_ok(
+        PhidgetStepper_setControlMode(
+          stepper_,
+          CONTROL_MODE_RUN),
+        "setControlMode(CONTROL_MODE_RUN)"))
+    {
+      return hardware_interface::CallbackReturn::ERROR;
+    }
+
+    if (!phidget_ok(
+        PhidgetStepper_setAcceleration(
+          stepper_,
+          auger_acceleration_),
+        "setAcceleration"))
+    {
+      return hardware_interface::CallbackReturn::ERROR;
+    }
+
+    if (!phidget_ok(
+        PhidgetStepper_setCurrentLimit(
+          stepper_,
+          maximum_stepper_current_a_),
+        "setCurrentLimit"))
+    {
+      return hardware_interface::CallbackReturn::ERROR;
+    }
+
+    // Run Mode resets the velocity limit, so explicitly initialize it to zero.
+    if (!phidget_ok(
+        PhidgetStepper_setVelocityLimit(
+          stepper_,
+          0.0),
+        "setVelocityLimit(0)"))
+    {
+      return hardware_interface::CallbackReturn::ERROR;
+    }
+
+    if (!phidget_ok(
+        PhidgetStepper_setEngaged(
+          stepper_,
+          1),
+        "setEngaged(1)"))
+    {
+      return hardware_interface::CallbackReturn::ERROR;
+    }
+
+    double position = 0.0;
+
+    if (phidget_ok(
+        PhidgetStepper_getPosition(
+          stepper_,
+          &position),
+        "getPosition"))
+    {
+      /*
+       * This is the Phidget's internally tracked step position.
+       * It is not encoder feedback from the physical auger.
+       */
+      auger_position_state_ = position;
+    }
   }
 
-  // Send initial packet: shoulder stop, servo center (90°)
-  send_esp32_packet(ACT_STOP, 90);
+  hardware_active_ = true;
+
+  RCLCPP_INFO(
+    rclcpp::get_logger("Science2026System"),
+    "Science hardware interface activated.");
 
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
-// ============================================================================
-// REAL HARDWARE: DEACTIVATE PHASE
-// ============================================================================
+// =============================================================================
+// DEACTIVATE
+// =============================================================================
+
 hardware_interface::CallbackReturn Science2026System::on_deactivate(
   const rclcpp_lifecycle::State &)
 {
-  send_esp32_packet(ACT_STOP, 90);
+  hardware_active_ = false;
+
+  lift_velocity_command_ = 0.0;
+  auger_velocity_command_ = 0.0;
+
+  if (esp32_serial_fd_ >= 0)
+  {
+    send_esp32_packet(
+      ACT_STOP,
+      tray_radians_to_servo_byte(tray_position_command_));
+  }
+
+  if (stepper_ != nullptr && stepper_attached_)
+  {
+    phidget_ok(
+      PhidgetStepper_setVelocityLimit(
+        stepper_,
+        0.0),
+      "setVelocityLimit(0)");
+
+    phidget_ok(
+      PhidgetStepper_setEngaged(
+        stepper_,
+        0),
+      "setEngaged(0)");
+  }
+
   cleanup_phidgets();
   close_esp32_serial();
+
+  last_lift_command_byte_ = ACT_STOP;
+  last_auger_velocity_command_ = 0.0;
+
+  RCLCPP_INFO(
+    rclcpp::get_logger("Science2026System"),
+    "Science hardware interface deactivated.");
 
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
-// ============================================================================
-// READ PHASE
-// ============================================================================
+// =============================================================================
+// READ
+// =============================================================================
+
 hardware_interface::return_type Science2026System::read(
   const rclcpp::Time &,
-  const rclcpp::Duration &)
+  const rclcpp::Duration & period)
 {
-  // ========================================================================
-  // REAL HARDWARE: Read Stepper Motor Position (base_yaw)
-  // ========================================================================
-  if (stepper_ && stepper_attached_)
+  const double dt =
+    clamp_value(period.seconds(), 0.0, 0.1);
+
+  /*
+   * Linear actuator:
+   * There is no position feedback, so estimate motion only for RViz.
+   *
+   * The velocity command is expected to be approximately:
+   *   +1.0 = extend
+   *   -1.0 = retract
+   *    0.0 = stop
+   */
+  double normalized_lift_command = 0.0;
+
+  if (std::isfinite(lift_velocity_command_))
   {
-    double pos_deg = 0.0;
+    normalized_lift_command =
+      clamp_value(lift_velocity_command_, -1.0, 1.0);
+  }
+
+  lift_position_state_ +=
+    normalized_lift_command *
+    estimated_lift_speed_m_s_ *
+    dt;
+
+  lift_position_state_ = clamp_value(
+    lift_position_state_,
+    estimated_lift_min_position_m_,
+    estimated_lift_max_position_m_);
+
+  /*
+   * Auger:
+   * The Phidget tracks commanded steps internally, but there is no encoder.
+   * If the Phidget is unavailable, integrate the commanded velocity so RViz
+   * still shows the auger spinning.
+   */
+  if (stepper_ != nullptr && stepper_attached_)
+  {
+    double position = 0.0;
+
     if (phidget_ok(
-          PhidgetStepper_getPosition(stepper_, &pos_deg),
-          "getPosition"))
+        PhidgetStepper_getPosition(
+          stepper_,
+          &position),
+        "getPosition"))
     {
-      hw_states_[BASE_IDX] = pos_deg * M_PI / 180.0;
+      auger_position_state_ = position;
     }
   }
   else
   {
-    hw_states_[BASE_IDX] = hw_commands_[BASE_IDX];
+    const double estimated_velocity =
+      std::isfinite(auger_velocity_command_) ?
+      clamp_value(
+        auger_velocity_command_,
+        -maximum_auger_velocity_,
+        maximum_auger_velocity_) :
+      0.0;
+
+    auger_position_state_ +=
+      estimated_velocity * dt;
   }
 
-  // ========================================================================
-  // REAL HARDWARE: Servo State (elbow)
-  // ========================================================================
-  hw_states_[ELBOW_IDX] = servo_current_angle_deg_ * M_PI / 180.0;
-
-  // ========================================================================
-  // FAKE MOTORS: Just echo commands
-  // ========================================================================
-  hw_states_[SHOULDER_IDX] = hw_commands_[SHOULDER_IDX];
-  hw_states_[WRIST_ROLL_IDX] = hw_commands_[WRIST_ROLL_IDX];
-  hw_states_[WRIST_TWIST_IDX] = hw_commands_[WRIST_TWIST_IDX];
-  hw_states_[CLAW_IDX] = hw_commands_[CLAW_IDX];
+  /*
+   * Tray:
+   * There is no servo feedback, so report the snapped commanded position.
+   */
+  tray_position_state_ =
+    snap_tray_angle_radians(tray_position_command_);
 
   return hardware_interface::return_type::OK;
 }
 
-// ============================================================================
-// WRITE PHASE
-// ============================================================================
+// =============================================================================
+// WRITE
+// =============================================================================
+
 hardware_interface::return_type Science2026System::write(
   const rclcpp::Time &,
   const rclcpp::Duration &)
 {
-  // ========================================================================
-  // REAL HARDWARE: Stepper Motor (base_yaw) - CONTINUOUS SPIN
-  // ========================================================================
-  if (stepper_ && stepper_attached_)
+  if (!hardware_active_)
   {
-    double velocity_cmd = hw_commands_[BASE_IDX];
-    velocity_cmd = clampf(velocity_cmd, -MAX_VELOCITY_RAD_S, MAX_VELOCITY_RAD_S);
-    double velocity_deg_s = velocity_cmd * 180.0 / M_PI;
-    
-    phidget_ok(
-      PhidgetStepper_setVelocityLimit(stepper_, std::abs(velocity_deg_s)),
-      "setVelocityLimit");
-    
-    const double direction = (velocity_cmd >= 0) ? 1.0 : -1.0;
-    const double continuous_target = direction * 1e9;
-    phidget_ok(
-      PhidgetStepper_setTargetPosition(stepper_, continuous_target),
-      "setTargetPosition");
-    
-    int engaged = 0;
-    if (phidget_ok(
-          PhidgetStepper_getEngaged(stepper_, &engaged),
-          "getEngaged"))
+    return hardware_interface::return_type::OK;
+  }
+
+  // -------------------------------------------------------------------------
+  // Linear actuator command
+  // -------------------------------------------------------------------------
+
+  if (!std::isfinite(lift_velocity_command_))
+  {
+    lift_velocity_command_ = 0.0;
+  }
+
+  lift_velocity_command_ =
+    clamp_value(lift_velocity_command_, -1.0, 1.0);
+
+  const uint8_t lift_command_byte =
+    lift_command_to_byte(lift_velocity_command_);
+
+  // -------------------------------------------------------------------------
+  // Beaker tray command
+  // -------------------------------------------------------------------------
+
+  tray_position_command_ =
+    snap_tray_angle_radians(tray_position_command_);
+
+  const uint8_t tray_servo_byte =
+    tray_radians_to_servo_byte(tray_position_command_);
+
+  /*
+   * Send both ESP32 commands together.
+   *
+   * The packet is sent every control cycle so the ESP32 always receives the
+   * current actuator state. A firmware-side timeout is still recommended.
+   */
+  if (esp32_connected_)
+  {
+    if (!send_esp32_packet(
+        lift_command_byte,
+        tray_servo_byte))
     {
-      if (!engaged && std::abs(velocity_cmd) > 0.01)
+      RCLCPP_WARN(
+        rclcpp::get_logger("Science2026System"),
+        "Failed to send command packet to the ESP32.");
+    }
+  }
+
+  last_lift_command_byte_ = lift_command_byte;
+  last_tray_servo_byte_ = tray_servo_byte;
+
+  // -------------------------------------------------------------------------
+  // Auger stepper velocity command
+  // -------------------------------------------------------------------------
+
+  if (!std::isfinite(auger_velocity_command_))
+  {
+    auger_velocity_command_ = 0.0;
+  }
+
+  const double requested_auger_velocity =
+    clamp_value(
+      auger_velocity_command_,
+      -maximum_auger_velocity_,
+      maximum_auger_velocity_);
+
+  if (stepper_ != nullptr && stepper_attached_)
+  {
+    if (!phidget_ok(
+        PhidgetStepper_setVelocityLimit(
+          stepper_,
+          requested_auger_velocity),
+        "setVelocityLimit"))
+    {
+      return hardware_interface::return_type::ERROR;
+    }
+
+    int engaged = 0;
+
+    if (
+      phidget_ok(
+        PhidgetStepper_getEngaged(
+          stepper_,
+          &engaged),
+        "getEngaged") &&
+      !engaged)
+    {
+      if (!phidget_ok(
+          PhidgetStepper_setEngaged(
+            stepper_,
+            1),
+          "setEngaged re-engage"))
       {
-        phidget_ok(
-          PhidgetStepper_setEngaged(stepper_, 1),
-          "setEngaged re-engage");
+        return hardware_interface::return_type::ERROR;
       }
     }
   }
 
-  // ========================================================================
-  // REAL HARDWARE: ESP32 (Shoulder Motor + Elbow Servo)
-  // ========================================================================
-  // Get shoulder command
-  const uint8_t shoulder_cmd = command_to_byte(hw_commands_[SHOULDER_IDX]);
-  
-  // Get servo command from elbow joint (convert rad to degrees)
-  double elbow_angle_rad = hw_commands_[ELBOW_IDX];
-  double servo_angle_deg = angle_to_servo_byte(elbow_angle_rad);
-  
-  // Update servo state (for feedback)
-  servo_current_angle_deg_ = servo_angle_deg;
-  
-  // Send combined packet to ESP32
-  if (esp32_serial_fd_ >= 0)
-  {
-    send_esp32_packet(shoulder_cmd, static_cast<uint8_t>(servo_angle_deg));
-  }
+  last_auger_velocity_command_ =
+    requested_auger_velocity;
 
   return hardware_interface::return_type::OK;
 }

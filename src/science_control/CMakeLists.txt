@@ -19,7 +19,7 @@ add_library(science_2026 SHARED
   src/science_2026_system.cpp
 )
 
-add_executable(science_2026_keyboard_teleop
+add_executable(keyboard_teleop
   teleop/science_2026_keyboard_teleop.cpp
 )
 
@@ -36,7 +36,7 @@ ament_target_dependencies(science_2026
   std_msgs
 )
 
-ament_target_dependencies(science_2026_keyboard_teleop
+ament_target_dependencies(keyboard_teleop
   rclcpp
   sensor_msgs
   std_msgs
@@ -72,7 +72,7 @@ install(
 install(
   TARGETS
     science_2026
-    science_2026_keyboard_teleop
+    keyboard_teleop
     
   EXPORT export_${PROJECT_NAME}
   ARCHIVE DESTINATION lib

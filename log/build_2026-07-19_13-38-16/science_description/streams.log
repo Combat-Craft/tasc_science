@@ -1,0 +1,22 @@
+[0.027s] Invoking command in '/home/ibrahim/tasc_science/build/science_description': CMAKE_PREFIX_PATH=/home/ibrahim/tasc_science/install/science_control:/home/ibrahim/tasc_science/install/science_bringup:/home/ibrahim/tasc_science/install/science_description:/opt/ros/humble /usr/bin/cmake --build /home/ibrahim/tasc_science/build/science_description -- -j4 -l4
+[0.110s] Invoked command in '/home/ibrahim/tasc_science/build/science_description' returned '0': CMAKE_PREFIX_PATH=/home/ibrahim/tasc_science/install/science_control:/home/ibrahim/tasc_science/install/science_bringup:/home/ibrahim/tasc_science/install/science_description:/opt/ros/humble /usr/bin/cmake --build /home/ibrahim/tasc_science/build/science_description -- -j4 -l4
+[0.116s] Invoking command in '/home/ibrahim/tasc_science/build/science_description': CMAKE_PREFIX_PATH=/home/ibrahim/tasc_science/install/science_control:/home/ibrahim/tasc_science/install/science_bringup:/home/ibrahim/tasc_science/install/science_description:/opt/ros/humble /usr/bin/cmake --install /home/ibrahim/tasc_science/build/science_description
+[0.129s] -- Install configuration: ""
+[0.130s] -- Execute custom install script
+[0.133s] -- Up-to-date symlink: /home/ibrahim/tasc_science/install/science_description/share/science_description/urdf/science_2026.urdf.xacro
+[0.134s] -- Up-to-date symlink: /home/ibrahim/tasc_science/install/science_description/share/ament_index/resource_index/package_run_dependencies/science_description
+[0.134s] -- Up-to-date symlink: /home/ibrahim/tasc_science/install/science_description/share/ament_index/resource_index/parent_prefix_path/science_description
+[0.134s] -- Up-to-date symlink: /home/ibrahim/tasc_science/install/science_description/share/science_description/environment/ament_prefix_path.sh
+[0.134s] -- Up-to-date symlink: /home/ibrahim/tasc_science/install/science_description/share/science_description/environment/ament_prefix_path.dsv
+[0.135s] -- Up-to-date symlink: /home/ibrahim/tasc_science/install/science_description/share/science_description/environment/path.sh
+[0.135s] -- Up-to-date symlink: /home/ibrahim/tasc_science/install/science_description/share/science_description/environment/path.dsv
+[0.135s] -- Up-to-date symlink: /home/ibrahim/tasc_science/install/science_description/share/science_description/local_setup.bash
+[0.135s] -- Up-to-date symlink: /home/ibrahim/tasc_science/install/science_description/share/science_description/local_setup.sh
+[0.135s] -- Up-to-date symlink: /home/ibrahim/tasc_science/install/science_description/share/science_description/local_setup.zsh
+[0.135s] -- Up-to-date symlink: /home/ibrahim/tasc_science/install/science_description/share/science_description/local_setup.dsv
+[0.135s] -- Symlinking: /home/ibrahim/tasc_science/install/science_description/share/science_description/package.dsv
+[0.160s] -- Up-to-date symlink: /home/ibrahim/tasc_science/install/science_description/share/ament_index/resource_index/packages/science_description
+[0.161s] -- Up-to-date symlink: /home/ibrahim/tasc_science/install/science_description/share/science_description/cmake/science_descriptionConfig.cmake
+[0.161s] -- Up-to-date symlink: /home/ibrahim/tasc_science/install/science_description/share/science_description/cmake/science_descriptionConfig-version.cmake
+[0.162s] -- Up-to-date symlink: /home/ibrahim/tasc_science/install/science_description/share/science_description/package.xml
+[0.166s] Invoked command in '/home/ibrahim/tasc_science/build/science_description' returned '0': CMAKE_PREFIX_PATH=/home/ibrahim/tasc_science/install/science_control:/home/ibrahim/tasc_science/install/science_bringup:/home/ibrahim/tasc_science/install/science_description:/opt/ros/humble /usr/bin/cmake --install /home/ibrahim/tasc_science/build/science_description

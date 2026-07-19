@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/rida/tasc_science/src/science_control
+CMAKE_SOURCE_DIR = /home/ibrahim/tasc_science/src/science_control
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/rida/tasc_science/build/science_control
+CMAKE_BINARY_DIR = /home/ibrahim/tasc_science/build/science_control
 
 # Include any dependencies generated for this target.
 include CMakeFiles/science_2026.dir/depend.make
@@ -70,18 +70,18 @@ include CMakeFiles/science_2026.dir/progress.make
 include CMakeFiles/science_2026.dir/flags.make
 
 CMakeFiles/science_2026.dir/src/science_2026_system.cpp.o: CMakeFiles/science_2026.dir/flags.make
-CMakeFiles/science_2026.dir/src/science_2026_system.cpp.o: /home/rida/tasc_science/src/science_control/src/science_2026_system.cpp
+CMakeFiles/science_2026.dir/src/science_2026_system.cpp.o: /home/ibrahim/tasc_science/src/science_control/src/science_2026_system.cpp
 CMakeFiles/science_2026.dir/src/science_2026_system.cpp.o: CMakeFiles/science_2026.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/rida/tasc_science/build/science_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/science_2026.dir/src/science_2026_system.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/science_2026.dir/src/science_2026_system.cpp.o -MF CMakeFiles/science_2026.dir/src/science_2026_system.cpp.o.d -o CMakeFiles/science_2026.dir/src/science_2026_system.cpp.o -c /home/rida/tasc_science/src/science_control/src/science_2026_system.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ibrahim/tasc_science/build/science_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/science_2026.dir/src/science_2026_system.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/science_2026.dir/src/science_2026_system.cpp.o -MF CMakeFiles/science_2026.dir/src/science_2026_system.cpp.o.d -o CMakeFiles/science_2026.dir/src/science_2026_system.cpp.o -c /home/ibrahim/tasc_science/src/science_control/src/science_2026_system.cpp
 
 CMakeFiles/science_2026.dir/src/science_2026_system.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/science_2026.dir/src/science_2026_system.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/rida/tasc_science/src/science_control/src/science_2026_system.cpp > CMakeFiles/science_2026.dir/src/science_2026_system.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ibrahim/tasc_science/src/science_control/src/science_2026_system.cpp > CMakeFiles/science_2026.dir/src/science_2026_system.cpp.i
 
 CMakeFiles/science_2026.dir/src/science_2026_system.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/science_2026.dir/src/science_2026_system.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/rida/tasc_science/src/science_control/src/science_2026_system.cpp -o CMakeFiles/science_2026.dir/src/science_2026_system.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ibrahim/tasc_science/src/science_control/src/science_2026_system.cpp -o CMakeFiles/science_2026.dir/src/science_2026_system.cpp.s
 
 # Object files for target science_2026
 science_2026_OBJECTS = \
@@ -92,12 +92,116 @@ science_2026_EXTERNAL_OBJECTS =
 
 libscience_2026.so: CMakeFiles/science_2026.dir/src/science_2026_system.cpp.o
 libscience_2026.so: CMakeFiles/science_2026.dir/build.make
-libscience_2026.so: /home/rida/ros2control/install/hardware_interface/lib/libfake_components.so
-libscience_2026.so: /home/rida/ros2control/install/hardware_interface/lib/libmock_components.so
-libscience_2026.so: /home/rida/ros2control/install/hardware_interface/lib/libhardware_interface.so
-libscience_2026.so: /usr/lib/x86_64-linux-gnu/libphidget22.so
+libscience_2026.so: /opt/ros/humble/lib/librclcpp_lifecycle.so
+libscience_2026.so: /opt/ros/humble/lib/libfake_components.so
+libscience_2026.so: /opt/ros/humble/lib/libmock_components.so
+libscience_2026.so: /opt/ros/humble/lib/libhardware_interface.so
+libscience_2026.so: /opt/ros/humble/lib/libbuiltin_interfaces__rosidl_generator_c.so
+libscience_2026.so: /opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_fastrtps_c.so
+libscience_2026.so: /opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_introspection_c.so
+libscience_2026.so: /opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_c.so
+libscience_2026.so: /opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_fastrtps_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_introspection_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libbuiltin_interfaces__rosidl_generator_py.so
+libscience_2026.so: /opt/ros/humble/lib/libgeometry_msgs__rosidl_generator_c.so
+libscience_2026.so: /opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_fastrtps_c.so
+libscience_2026.so: /opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_introspection_c.so
+libscience_2026.so: /opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_c.so
+libscience_2026.so: /opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_fastrtps_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_introspection_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libgeometry_msgs__rosidl_generator_py.so
+libscience_2026.so: /opt/ros/humble/lib/libstd_msgs__rosidl_generator_c.so
+libscience_2026.so: /opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_fastrtps_c.so
+libscience_2026.so: /opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_fastrtps_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_introspection_c.so
+libscience_2026.so: /opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_c.so
+libscience_2026.so: /opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_introspection_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libstd_msgs__rosidl_generator_py.so
+libscience_2026.so: /opt/ros/humble/lib/libtrajectory_msgs__rosidl_generator_c.so
+libscience_2026.so: /opt/ros/humble/lib/libtrajectory_msgs__rosidl_typesupport_fastrtps_c.so
+libscience_2026.so: /opt/ros/humble/lib/libtrajectory_msgs__rosidl_typesupport_fastrtps_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libtrajectory_msgs__rosidl_typesupport_introspection_c.so
+libscience_2026.so: /opt/ros/humble/lib/libtrajectory_msgs__rosidl_typesupport_c.so
+libscience_2026.so: /opt/ros/humble/lib/libtrajectory_msgs__rosidl_typesupport_introspection_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libtrajectory_msgs__rosidl_typesupport_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libtrajectory_msgs__rosidl_generator_py.so
+libscience_2026.so: /opt/ros/humble/lib/libaction_msgs__rosidl_generator_c.so
+libscience_2026.so: /opt/ros/humble/lib/libaction_msgs__rosidl_typesupport_fastrtps_c.so
+libscience_2026.so: /opt/ros/humble/lib/libaction_msgs__rosidl_typesupport_fastrtps_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libaction_msgs__rosidl_typesupport_introspection_c.so
+libscience_2026.so: /opt/ros/humble/lib/libaction_msgs__rosidl_typesupport_c.so
+libscience_2026.so: /opt/ros/humble/lib/libaction_msgs__rosidl_typesupport_introspection_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libaction_msgs__rosidl_typesupport_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libaction_msgs__rosidl_generator_py.so
+libscience_2026.so: /opt/ros/humble/lib/librosidl_typesupport_fastrtps_c.so
+libscience_2026.so: /opt/ros/humble/lib/librmw.so
+libscience_2026.so: /opt/ros/humble/lib/librosidl_typesupport_fastrtps_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/librosidl_typesupport_c.so
+libscience_2026.so: /opt/ros/humble/lib/librosidl_typesupport_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/librosidl_runtime_c.so
+libscience_2026.so: /opt/ros/humble/lib/librosidl_typesupport_introspection_c.so
+libscience_2026.so: /opt/ros/humble/lib/librosidl_typesupport_introspection_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libcontrol_msgs__rosidl_generator_c.so
+libscience_2026.so: /opt/ros/humble/lib/libcontrol_msgs__rosidl_typesupport_fastrtps_c.so
+libscience_2026.so: /opt/ros/humble/lib/libaction_msgs__rosidl_typesupport_fastrtps_c.so
+libscience_2026.so: /opt/ros/humble/lib/libunique_identifier_msgs__rosidl_typesupport_fastrtps_c.so
+libscience_2026.so: /opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_fastrtps_c.so
+libscience_2026.so: /opt/ros/humble/lib/libtrajectory_msgs__rosidl_typesupport_fastrtps_c.so
+libscience_2026.so: /opt/ros/humble/lib/libcontrol_msgs__rosidl_typesupport_fastrtps_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libaction_msgs__rosidl_typesupport_fastrtps_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libunique_identifier_msgs__rosidl_typesupport_fastrtps_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_fastrtps_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libtrajectory_msgs__rosidl_typesupport_fastrtps_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libcontrol_msgs__rosidl_typesupport_introspection_c.so
+libscience_2026.so: /opt/ros/humble/lib/libaction_msgs__rosidl_typesupport_introspection_c.so
+libscience_2026.so: /opt/ros/humble/lib/libunique_identifier_msgs__rosidl_typesupport_introspection_c.so
+libscience_2026.so: /opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_introspection_c.so
+libscience_2026.so: /opt/ros/humble/lib/libtrajectory_msgs__rosidl_typesupport_introspection_c.so
+libscience_2026.so: /opt/ros/humble/lib/libcontrol_msgs__rosidl_typesupport_c.so
+libscience_2026.so: /opt/ros/humble/lib/libcontrol_msgs__rosidl_typesupport_introspection_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libaction_msgs__rosidl_typesupport_introspection_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libunique_identifier_msgs__rosidl_typesupport_introspection_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_introspection_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libtrajectory_msgs__rosidl_typesupport_introspection_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libcontrol_msgs__rosidl_typesupport_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libaction_msgs__rosidl_typesupport_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libunique_identifier_msgs__rosidl_typesupport_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libtrajectory_msgs__rosidl_typesupport_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/libcontrol_msgs__rosidl_generator_py.so
+libscience_2026.so: /opt/ros/humble/lib/libcontrol_msgs__rosidl_typesupport_c.so
+libscience_2026.so: /opt/ros/humble/lib/libaction_msgs__rosidl_generator_py.so
+libscience_2026.so: /opt/ros/humble/lib/libunique_identifier_msgs__rosidl_generator_py.so
+libscience_2026.so: /opt/ros/humble/lib/libsensor_msgs__rosidl_generator_py.so
+libscience_2026.so: /opt/ros/humble/lib/libtrajectory_msgs__rosidl_generator_py.so
+libscience_2026.so: /opt/ros/humble/lib/liblifecycle_msgs__rosidl_generator_c.so
+libscience_2026.so: /opt/ros/humble/lib/liblifecycle_msgs__rosidl_typesupport_fastrtps_c.so
+libscience_2026.so: /opt/ros/humble/lib/liblifecycle_msgs__rosidl_typesupport_introspection_c.so
+libscience_2026.so: /opt/ros/humble/lib/liblifecycle_msgs__rosidl_typesupport_c.so
+libscience_2026.so: /opt/ros/humble/lib/liblifecycle_msgs__rosidl_typesupport_fastrtps_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/liblifecycle_msgs__rosidl_typesupport_introspection_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/liblifecycle_msgs__rosidl_typesupport_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/liblifecycle_msgs__rosidl_generator_py.so
+libscience_2026.so: /usr/lib/x86_64-linux-gnu/libpython3.10.so
+libscience_2026.so: /usr/lib/x86_64-linux-gnu/libconsole_bridge.so.1.0
+libscience_2026.so: /opt/ros/humble/lib/libclass_loader.so
+libscience_2026.so: /opt/ros/humble/lib/libclass_loader.so
+libscience_2026.so: /usr/lib/x86_64-linux-gnu/libtinyxml2.so
 libscience_2026.so: /opt/ros/humble/lib/librclcpp_lifecycle.so
 libscience_2026.so: /opt/ros/humble/lib/librclcpp.so
+libscience_2026.so: /opt/ros/humble/lib/librcl_lifecycle.so
+libscience_2026.so: /opt/ros/humble/lib/liblifecycle_msgs__rosidl_typesupport_fastrtps_c.so
+libscience_2026.so: /opt/ros/humble/lib/liblifecycle_msgs__rosidl_typesupport_introspection_c.so
+libscience_2026.so: /opt/ros/humble/lib/liblifecycle_msgs__rosidl_typesupport_fastrtps_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/liblifecycle_msgs__rosidl_typesupport_introspection_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/liblifecycle_msgs__rosidl_typesupport_cpp.so
+libscience_2026.so: /opt/ros/humble/lib/liblifecycle_msgs__rosidl_generator_py.so
+libscience_2026.so: /opt/ros/humble/lib/librcpputils.so
+libscience_2026.so: /opt/ros/humble/lib/librcutils.so
+libscience_2026.so: /usr/local/lib/libphidget22.so
 libscience_2026.so: /opt/ros/humble/lib/liblibstatistics_collector.so
 libscience_2026.so: /opt/ros/humble/lib/librosgraph_msgs__rosidl_typesupport_fastrtps_c.so
 libscience_2026.so: /opt/ros/humble/lib/librosgraph_msgs__rosidl_typesupport_fastrtps_cpp.so
@@ -115,7 +219,6 @@ libscience_2026.so: /opt/ros/humble/lib/libstatistics_msgs__rosidl_typesupport_c
 libscience_2026.so: /opt/ros/humble/lib/libstatistics_msgs__rosidl_generator_py.so
 libscience_2026.so: /opt/ros/humble/lib/libstatistics_msgs__rosidl_typesupport_c.so
 libscience_2026.so: /opt/ros/humble/lib/libstatistics_msgs__rosidl_generator_c.so
-libscience_2026.so: /opt/ros/humble/lib/librcl_lifecycle.so
 libscience_2026.so: /opt/ros/humble/lib/librcl.so
 libscience_2026.so: /opt/ros/humble/lib/librcl_interfaces__rosidl_typesupport_fastrtps_c.so
 libscience_2026.so: /opt/ros/humble/lib/librcl_interfaces__rosidl_typesupport_introspection_c.so
@@ -131,96 +234,57 @@ libscience_2026.so: /opt/ros/humble/lib/librmw_implementation.so
 libscience_2026.so: /opt/ros/humble/lib/librcl_logging_spdlog.so
 libscience_2026.so: /opt/ros/humble/lib/librcl_logging_interface.so
 libscience_2026.so: /opt/ros/humble/lib/libtracetools.so
-libscience_2026.so: /opt/ros/humble/lib/libament_index_cpp.so
-libscience_2026.so: /opt/ros/humble/lib/libclass_loader.so
-libscience_2026.so: /usr/lib/x86_64-linux-gnu/libconsole_bridge.so.1.0
-libscience_2026.so: /opt/ros/humble/lib/liblifecycle_msgs__rosidl_typesupport_fastrtps_c.so
-libscience_2026.so: /opt/ros/humble/lib/liblifecycle_msgs__rosidl_typesupport_introspection_c.so
-libscience_2026.so: /opt/ros/humble/lib/liblifecycle_msgs__rosidl_typesupport_fastrtps_cpp.so
-libscience_2026.so: /opt/ros/humble/lib/liblifecycle_msgs__rosidl_typesupport_introspection_cpp.so
-libscience_2026.so: /opt/ros/humble/lib/liblifecycle_msgs__rosidl_typesupport_cpp.so
-libscience_2026.so: /opt/ros/humble/lib/liblifecycle_msgs__rosidl_generator_py.so
 libscience_2026.so: /opt/ros/humble/lib/liblifecycle_msgs__rosidl_typesupport_c.so
 libscience_2026.so: /opt/ros/humble/lib/liblifecycle_msgs__rosidl_generator_c.so
-libscience_2026.so: /opt/ros/humble/lib/libcontrol_msgs__rosidl_typesupport_fastrtps_c.so
-libscience_2026.so: /opt/ros/humble/lib/libaction_msgs__rosidl_typesupport_fastrtps_c.so
-libscience_2026.so: /opt/ros/humble/lib/libunique_identifier_msgs__rosidl_typesupport_fastrtps_c.so
-libscience_2026.so: /opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_fastrtps_c.so
-libscience_2026.so: /opt/ros/humble/lib/libtrajectory_msgs__rosidl_typesupport_fastrtps_c.so
+libscience_2026.so: /opt/ros/humble/lib/libament_index_cpp.so
+libscience_2026.so: /usr/lib/x86_64-linux-gnu/libconsole_bridge.so.1.0
 libscience_2026.so: /opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_fastrtps_c.so
 libscience_2026.so: /opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_fastrtps_c.so
 libscience_2026.so: /opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_fastrtps_c.so
 libscience_2026.so: /opt/ros/humble/lib/librosidl_typesupport_fastrtps_c.so
-libscience_2026.so: /opt/ros/humble/lib/libcontrol_msgs__rosidl_typesupport_fastrtps_cpp.so
-libscience_2026.so: /opt/ros/humble/lib/libaction_msgs__rosidl_typesupport_fastrtps_cpp.so
-libscience_2026.so: /opt/ros/humble/lib/libunique_identifier_msgs__rosidl_typesupport_fastrtps_cpp.so
-libscience_2026.so: /opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_fastrtps_cpp.so
-libscience_2026.so: /opt/ros/humble/lib/libtrajectory_msgs__rosidl_typesupport_fastrtps_cpp.so
 libscience_2026.so: /opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_fastrtps_cpp.so
 libscience_2026.so: /opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_fastrtps_cpp.so
 libscience_2026.so: /opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_fastrtps_cpp.so
 libscience_2026.so: /opt/ros/humble/lib/librosidl_typesupport_fastrtps_cpp.so
 libscience_2026.so: /opt/ros/humble/lib/libfastcdr.so.1.0.24
 libscience_2026.so: /opt/ros/humble/lib/librmw.so
-libscience_2026.so: /opt/ros/humble/lib/libcontrol_msgs__rosidl_typesupport_introspection_c.so
-libscience_2026.so: /opt/ros/humble/lib/libaction_msgs__rosidl_typesupport_introspection_c.so
-libscience_2026.so: /opt/ros/humble/lib/libunique_identifier_msgs__rosidl_typesupport_introspection_c.so
-libscience_2026.so: /opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_introspection_c.so
-libscience_2026.so: /opt/ros/humble/lib/libtrajectory_msgs__rosidl_typesupport_introspection_c.so
 libscience_2026.so: /opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_introspection_c.so
 libscience_2026.so: /opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_introspection_c.so
 libscience_2026.so: /opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_introspection_c.so
-libscience_2026.so: /opt/ros/humble/lib/libcontrol_msgs__rosidl_typesupport_introspection_cpp.so
-libscience_2026.so: /opt/ros/humble/lib/libaction_msgs__rosidl_typesupport_introspection_cpp.so
-libscience_2026.so: /opt/ros/humble/lib/libunique_identifier_msgs__rosidl_typesupport_introspection_cpp.so
-libscience_2026.so: /opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_introspection_cpp.so
-libscience_2026.so: /opt/ros/humble/lib/libtrajectory_msgs__rosidl_typesupport_introspection_cpp.so
 libscience_2026.so: /opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_introspection_cpp.so
 libscience_2026.so: /opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_introspection_cpp.so
 libscience_2026.so: /opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_introspection_cpp.so
 libscience_2026.so: /opt/ros/humble/lib/librosidl_typesupport_introspection_cpp.so
 libscience_2026.so: /opt/ros/humble/lib/librosidl_typesupport_introspection_c.so
-libscience_2026.so: /opt/ros/humble/lib/libcontrol_msgs__rosidl_typesupport_cpp.so
-libscience_2026.so: /opt/ros/humble/lib/libaction_msgs__rosidl_typesupport_cpp.so
-libscience_2026.so: /opt/ros/humble/lib/libunique_identifier_msgs__rosidl_typesupport_cpp.so
-libscience_2026.so: /opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_cpp.so
-libscience_2026.so: /opt/ros/humble/lib/libtrajectory_msgs__rosidl_typesupport_cpp.so
 libscience_2026.so: /opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_cpp.so
 libscience_2026.so: /opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_cpp.so
 libscience_2026.so: /opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_cpp.so
 libscience_2026.so: /opt/ros/humble/lib/librosidl_typesupport_cpp.so
-libscience_2026.so: /opt/ros/humble/lib/libcontrol_msgs__rosidl_generator_py.so
-libscience_2026.so: /opt/ros/humble/lib/libcontrol_msgs__rosidl_typesupport_c.so
 libscience_2026.so: /opt/ros/humble/lib/libcontrol_msgs__rosidl_generator_c.so
-libscience_2026.so: /opt/ros/humble/lib/libaction_msgs__rosidl_generator_py.so
 libscience_2026.so: /opt/ros/humble/lib/libaction_msgs__rosidl_typesupport_c.so
 libscience_2026.so: /opt/ros/humble/lib/libaction_msgs__rosidl_generator_c.so
-libscience_2026.so: /opt/ros/humble/lib/libunique_identifier_msgs__rosidl_generator_py.so
 libscience_2026.so: /opt/ros/humble/lib/libunique_identifier_msgs__rosidl_typesupport_c.so
 libscience_2026.so: /opt/ros/humble/lib/libunique_identifier_msgs__rosidl_generator_c.so
-libscience_2026.so: /opt/ros/humble/lib/libsensor_msgs__rosidl_generator_py.so
 libscience_2026.so: /opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_c.so
 libscience_2026.so: /opt/ros/humble/lib/libsensor_msgs__rosidl_generator_c.so
-libscience_2026.so: /opt/ros/humble/lib/libtrajectory_msgs__rosidl_generator_py.so
 libscience_2026.so: /opt/ros/humble/lib/libtrajectory_msgs__rosidl_typesupport_c.so
 libscience_2026.so: /opt/ros/humble/lib/libtrajectory_msgs__rosidl_generator_c.so
 libscience_2026.so: /opt/ros/humble/lib/libgeometry_msgs__rosidl_generator_py.so
 libscience_2026.so: /opt/ros/humble/lib/libstd_msgs__rosidl_generator_py.so
-libscience_2026.so: /opt/ros/humble/lib/libbuiltin_interfaces__rosidl_generator_py.so
-libscience_2026.so: /usr/lib/x86_64-linux-gnu/libpython3.10.so
 libscience_2026.so: /opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_c.so
 libscience_2026.so: /opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_c.so
+libscience_2026.so: /opt/ros/humble/lib/libgeometry_msgs__rosidl_generator_c.so
+libscience_2026.so: /opt/ros/humble/lib/libstd_msgs__rosidl_generator_c.so
+libscience_2026.so: /opt/ros/humble/lib/libbuiltin_interfaces__rosidl_generator_py.so
 libscience_2026.so: /opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_c.so
 libscience_2026.so: /opt/ros/humble/lib/librosidl_typesupport_c.so
 libscience_2026.so: /opt/ros/humble/lib/librcpputils.so
-libscience_2026.so: /opt/ros/humble/lib/libgeometry_msgs__rosidl_generator_c.so
-libscience_2026.so: /opt/ros/humble/lib/libstd_msgs__rosidl_generator_c.so
 libscience_2026.so: /opt/ros/humble/lib/libbuiltin_interfaces__rosidl_generator_c.so
 libscience_2026.so: /opt/ros/humble/lib/librosidl_runtime_c.so
 libscience_2026.so: /opt/ros/humble/lib/librcutils.so
-libscience_2026.so: /usr/lib/x86_64-linux-gnu/libtinyxml2.so
+libscience_2026.so: /usr/lib/x86_64-linux-gnu/libpython3.10.so
 libscience_2026.so: CMakeFiles/science_2026.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/rida/tasc_science/build/science_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX shared library libscience_2026.so"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ibrahim/tasc_science/build/science_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX shared library libscience_2026.so"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/science_2026.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -232,6 +296,6 @@ CMakeFiles/science_2026.dir/clean:
 .PHONY : CMakeFiles/science_2026.dir/clean
 
 CMakeFiles/science_2026.dir/depend:
-	cd /home/rida/tasc_science/build/science_control && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/rida/tasc_science/src/science_control /home/rida/tasc_science/src/science_control /home/rida/tasc_science/build/science_control /home/rida/tasc_science/build/science_control /home/rida/tasc_science/build/science_control/CMakeFiles/science_2026.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ibrahim/tasc_science/build/science_control && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ibrahim/tasc_science/src/science_control /home/ibrahim/tasc_science/src/science_control /home/ibrahim/tasc_science/build/science_control /home/ibrahim/tasc_science/build/science_control /home/ibrahim/tasc_science/build/science_control/CMakeFiles/science_2026.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/science_2026.dir/depend
 

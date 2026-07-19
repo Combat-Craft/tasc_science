@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/rida/tasc_science/src/science_control
+CMAKE_SOURCE_DIR = /home/ibrahim/tasc_science/src/science_control
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/rida/tasc_science/build/science_control
+CMAKE_BINARY_DIR = /home/ibrahim/tasc_science/build/science_control
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -142,9 +142,9 @@ install/strip/fast: preinstall/fast
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/rida/tasc_science/build/science_control/CMakeFiles /home/rida/tasc_science/build/science_control//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ibrahim/tasc_science/build/science_control/CMakeFiles /home/ibrahim/tasc_science/build/science_control//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/rida/tasc_science/build/science_control/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ibrahim/tasc_science/build/science_control/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -211,17 +211,17 @@ science_2026/fast:
 .PHONY : science_2026/fast
 
 #=============================================================================
-# Target rules for targets named science_2026_keyboard_teleop
+# Target rules for targets named keyboard_teleop
 
 # Build rule for target.
-science_2026_keyboard_teleop: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 science_2026_keyboard_teleop
-.PHONY : science_2026_keyboard_teleop
+keyboard_teleop: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 keyboard_teleop
+.PHONY : keyboard_teleop
 
 # fast build rule for target.
-science_2026_keyboard_teleop/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/science_2026_keyboard_teleop.dir/build.make CMakeFiles/science_2026_keyboard_teleop.dir/build
-.PHONY : science_2026_keyboard_teleop/fast
+keyboard_teleop/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/keyboard_teleop.dir/build.make CMakeFiles/keyboard_teleop.dir/build
+.PHONY : keyboard_teleop/fast
 
 src/science_2026_system.o: src/science_2026_system.cpp.o
 .PHONY : src/science_2026_system.o
@@ -252,7 +252,7 @@ teleop/science_2026_keyboard_teleop.o: teleop/science_2026_keyboard_teleop.cpp.o
 
 # target to build an object file
 teleop/science_2026_keyboard_teleop.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/science_2026_keyboard_teleop.dir/build.make CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/keyboard_teleop.dir/build.make CMakeFiles/keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.o
 .PHONY : teleop/science_2026_keyboard_teleop.cpp.o
 
 teleop/science_2026_keyboard_teleop.i: teleop/science_2026_keyboard_teleop.cpp.i
@@ -260,7 +260,7 @@ teleop/science_2026_keyboard_teleop.i: teleop/science_2026_keyboard_teleop.cpp.i
 
 # target to preprocess a source file
 teleop/science_2026_keyboard_teleop.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/science_2026_keyboard_teleop.dir/build.make CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/keyboard_teleop.dir/build.make CMakeFiles/keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.i
 .PHONY : teleop/science_2026_keyboard_teleop.cpp.i
 
 teleop/science_2026_keyboard_teleop.s: teleop/science_2026_keyboard_teleop.cpp.s
@@ -268,7 +268,7 @@ teleop/science_2026_keyboard_teleop.s: teleop/science_2026_keyboard_teleop.cpp.s
 
 # target to generate assembly for a file
 teleop/science_2026_keyboard_teleop.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/science_2026_keyboard_teleop.dir/build.make CMakeFiles/science_2026_keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/keyboard_teleop.dir/build.make CMakeFiles/keyboard_teleop.dir/teleop/science_2026_keyboard_teleop.cpp.s
 .PHONY : teleop/science_2026_keyboard_teleop.cpp.s
 
 # Help Target
@@ -286,8 +286,8 @@ help:
 	@echo "... test"
 	@echo "... science_control_uninstall"
 	@echo "... uninstall"
+	@echo "... keyboard_teleop"
 	@echo "... science_2026"
-	@echo "... science_2026_keyboard_teleop"
 	@echo "... src/science_2026_system.o"
 	@echo "... src/science_2026_system.i"
 	@echo "... src/science_2026_system.s"
