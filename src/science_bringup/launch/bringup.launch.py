@@ -1,4 +1,5 @@
 from launch import LaunchDescription
+from launch.actions import TimerAction
 from launch.substitutions import Command, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
@@ -32,6 +33,7 @@ def generate_launch_description():
     control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
+        namespace="science",
         parameters=[
             {
                 "robot_description": robot_description,
@@ -44,10 +46,14 @@ def generate_launch_description():
     robot_state_publisher_node = Node(
         package="robot_state_publisher",
         executable="robot_state_publisher",
+        namespace="science",
         parameters=[
             {
                 "robot_description": robot_description,
             }
+        ],
+        remappings=[
+            ("/joint_states", "/science/joint_states"),
         ],
         output="screen",
     )
@@ -58,9 +64,9 @@ def generate_launch_description():
         arguments=[
             "joint_state_broadcaster",
             "--controller-manager",
-            "/controller_manager",
+            "/science/controller_manager",
             "--controller-manager-timeout",
-            "20",
+            "30",
         ],
         output="screen",
     )
@@ -71,9 +77,9 @@ def generate_launch_description():
         arguments=[
             "science_velocity_controller",
             "--controller-manager",
-            "/controller_manager",
+            "/science/controller_manager",
             "--controller-manager-timeout",
-            "20",
+            "30",
         ],
         output="screen",
     )
@@ -84,9 +90,9 @@ def generate_launch_description():
         arguments=[
             "beaker_position_controller",
             "--controller-manager",
-            "/controller_manager",
+            "/science/controller_manager",
             "--controller-manager-timeout",
-            "20",
+            "30",
         ],
         output="screen",
     )
@@ -94,14 +100,32 @@ def generate_launch_description():
     rviz_node = Node(
         package="rviz2",
         executable="rviz2",
+        namespace="science",
+        remappings=[
+            ("/joint_states", "/science/joint_states"),
+        ],
         output="screen",
     )
 
     return LaunchDescription([
         control_node,
         robot_state_publisher_node,
-        joint_state_broadcaster_spawner,
-        science_velocity_controller_spawner,
-        beaker_position_controller_spawner,
+
+        # The Phidget attachment attempt can take around five seconds.
+        TimerAction(
+            period=7.0,
+            actions=[
+                joint_state_broadcaster_spawner,
+            ],
+        ),
+
+        TimerAction(
+            period=9.0,
+            actions=[
+                science_velocity_controller_spawner,
+                beaker_position_controller_spawner,
+            ],
+        ),
+
         rviz_node,
     ])

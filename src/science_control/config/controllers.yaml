@@ -1,4 +1,4 @@
-controller_manager:
+/science/controller_manager:
   ros__parameters:
     update_rate: 50
 
@@ -12,14 +12,14 @@ controller_manager:
       type: position_controllers/JointGroupPositionController
 
 
-science_velocity_controller:
+/science/science_velocity_controller:
   ros__parameters:
     joints:
       - science_lift_joint
       - auger_spin_joint
 
 
-beaker_position_controller:
+/science/beaker_position_controller:
   ros__parameters:
     joints:
       - beaker_tray_joint

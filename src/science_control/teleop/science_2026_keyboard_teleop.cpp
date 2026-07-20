@@ -92,12 +92,12 @@ public:
 
     velocity_command_pub_ =
       create_publisher<std_msgs::msg::Float64MultiArray>(
-      "/science_velocity_controller/commands",
+      "/science/science_velocity_controller/commands",
       10);
 
     tray_command_pub_ =
       create_publisher<std_msgs::msg::Float64MultiArray>(
-      "/beaker_position_controller/commands",
+      "/science/beaker_position_controller/commands",
       10);
 
     publish_velocity_command();
@@ -186,10 +186,6 @@ private:
   {
     switch (key)
     {
-      // ---------------------------------------------------------
-      // Linear actuator manual control
-      // ---------------------------------------------------------
-
       case 'w':
       case 'W':
         set_lift_hold(lift_command_magnitude_);
@@ -199,10 +195,6 @@ private:
       case 'S':
         set_lift_hold(-lift_command_magnitude_);
         break;
-
-      // ---------------------------------------------------------
-      // Auger toggle state machine
-      // ---------------------------------------------------------
 
       case 'q':
       case 'Q':
@@ -214,26 +206,14 @@ private:
         handle_auger_reverse_key();
         break;
 
-      // ---------------------------------------------------------
-      // Beaker tray cycle
-      // ---------------------------------------------------------
-
       case 'e':
       case 'E':
         cycle_tray();
         break;
 
-      // ---------------------------------------------------------
-      // Emergency motion stop
-      // ---------------------------------------------------------
-
       case ' ':
         stop_all_motion();
         break;
-
-      // ---------------------------------------------------------
-      // Help
-      // ---------------------------------------------------------
 
       case 'h':
       case 'H':
