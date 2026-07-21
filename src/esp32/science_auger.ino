@@ -1,17 +1,17 @@
 #include <ESP32Servo.h>
 
-// ===== SERVO (ELBOW) =====
-Servo elbowServo;
-const int ELBOW_SERVO_PIN = 13;        // Pin for servo signal
-const int ELBOW_SERVO_MIN = 0;
-const int ELBOW_SERVO_MAX = 180;
-const int ELBOW_SERVO_CENTER = 90;
-int elbow_servo_target = 90;
-int elbow_servo_current = 90;
+// ===== SERVO (BEAKER) =====
+Servo beakerServo;
+const int BEAKER_SERVO_PIN = 23;        // Pin for servo signal
+const int BEAKER_SERVO_MIN = 0;
+const int BEAKER_SERVO_MAX = 180;
+const int BEAKER_SERVO_START = 0;
+int beaker_servo_target = 90;
+int beaker_servo_current = 90;
 
-// ===== SHOULDER MOTOR (BTS7960) =====
-const int SHOULDER_RPWM = 19;
-const int SHOULDER_LPWM = 21;
+// ===== LIFT MOTOR (BTS7960) =====
+const int LIFT_RPWM = 18;
+const int LIFT_LPWM = 19;
 
 // PWM settings
 const int PWM_FREQ = 1000;
@@ -35,24 +35,24 @@ const unsigned long CMD_TIMEOUT_MS = 300;
 unsigned long last_cmd_ms = 0;
 
 // ===== STATE MACHINE =====
-// Packet: [0xAA] [Shoulder_CMD] [Servo_Angle] [Checksum]
+// Packet: [0xAA] [Lift_CMD] [Servo_Angle] [Checksum]
 enum ParseState
 {
   WAIT_HEADER,
-  WAIT_SHOULDER,
-  WAIT_ELBOW_SERVO,
+  WAIT_LIFT,
+  WAIT_BEAKER_SERVO,
   WAIT_CHECKSUM
 };
 
 ParseState parse_state = WAIT_HEADER;
-uint8_t rx_shoulder = CMD_STOP;
-uint8_t rx_elbow_servo = 90;
+uint8_t rx_lift = CMD_STOP;
+uint8_t rx_beaker_servo = 0;
 
-// Shoulder motor state
-uint8_t shoulder_target_cmd = CMD_STOP;
-uint8_t shoulder_active_cmd = CMD_STOP;
-int shoulder_pwm = 0;
-unsigned long last_shoulder_ramp_ms = 0;
+// Lift motor state
+uint8_t lift_target_cmd = CMD_STOP;
+uint8_t lift_active_cmd = CMD_STOP;
+int lift_pwm = 0;
+unsigned long last_lift_ramp_ms = 0;
 
 // ===== MOTOR FUNCTIONS =====
 void stopMotor(int rpwm_pin, int lpwm_pin)
@@ -79,99 +79,99 @@ void driveMotor(int cmd, int pwm_val, int rpwm_pin, int lpwm_pin)
   }
 }
 
-void stopShoulderMotor()
+void stopLiftMotor()
 {
-  shoulder_target_cmd = CMD_STOP;
-  shoulder_active_cmd = CMD_STOP;
-  shoulder_pwm = 0;
-  stopMotor(SHOULDER_RPWM, SHOULDER_LPWM);
+  lift_target_cmd = CMD_STOP;
+  lift_active_cmd = CMD_STOP;
+  lift_pwm = 0;
+  stopMotor(LIFT_RPWM, LIFT_LPWM);
 }
 
-void updateShoulderRamp()
+void updateLiftRamp()
 {
   unsigned long now = millis();
 
-  if (shoulder_target_cmd == CMD_STOP)
+  if (lift_target_cmd == CMD_STOP)
   {
-    shoulder_active_cmd = CMD_STOP;
-    if (shoulder_pwm > 0 && (now - last_shoulder_ramp_ms) >= PWM_RAMP_INTERVAL_MS)
+    lift_active_cmd = CMD_STOP;
+    if (lift_pwm > 0 && (now - last_lift_ramp_ms) >= PWM_RAMP_INTERVAL_MS)
     {
-      shoulder_pwm -= PWM_RAMP_STEP;
-      if (shoulder_pwm < 0) {
-        shoulder_pwm = 0;
+      lift_pwm -= PWM_RAMP_STEP;
+      if (lift_pwm < 0) {
+        lift_pwm = 0;
       }
-      last_shoulder_ramp_ms = now;
+      last_lift_ramp_ms = now;
     }
 
-    if (shoulder_pwm == 0)
+    if (lift_pwm == 0)
     {
-      stopMotor(SHOULDER_RPWM, SHOULDER_LPWM);
+      stopMotor(LIFT_RPWM, LIFT_LPWM);
     }
     else
     {
-      driveMotor(shoulder_active_cmd, shoulder_pwm, SHOULDER_RPWM, SHOULDER_LPWM);
+      driveMotor(lift_active_cmd, lift_pwm, LIFT_RPWM, LIFT_LPWM);
     }
     return;
   }
 
   // If direction changes, force a stop before reversing
-  if (shoulder_active_cmd != CMD_STOP && shoulder_active_cmd != shoulder_target_cmd)
+  if (lift_active_cmd != CMD_STOP && lift_active_cmd != lift_target_cmd)
   {
-    if ((now - last_shoulder_ramp_ms) >= PWM_RAMP_INTERVAL_MS)
+    if ((now - last_lift_ramp_ms) >= PWM_RAMP_INTERVAL_MS)
     {
-      shoulder_pwm -= PWM_RAMP_STEP;
-      if (shoulder_pwm < 0) {
-        shoulder_pwm = 0;
+      lift_pwm -= PWM_RAMP_STEP;
+      if (lift_pwm < 0) {
+        lift_pwm = 0;
       }
-      last_shoulder_ramp_ms = now;
+      last_lift_ramp_ms = now;
     }
 
-    if (shoulder_pwm == 0)
+    if (lift_pwm == 0)
     {
-      shoulder_active_cmd = CMD_STOP;
-      stopMotor(SHOULDER_RPWM, SHOULDER_LPWM);
+      lift_active_cmd = CMD_STOP;
+      stopMotor(LIFT_RPWM, LIFT_LPWM);
     }
     else
     {
-      driveMotor(shoulder_active_cmd, shoulder_pwm, SHOULDER_RPWM, SHOULDER_LPWM);
+      driveMotor(lift_active_cmd, lift_pwm, LIFT_RPWM, LIFT_LPWM);
     }
     return;
   }
 
   // Start motion
-  if (shoulder_active_cmd == CMD_STOP)
+  if (lift_active_cmd == CMD_STOP)
   {
-    shoulder_active_cmd = shoulder_target_cmd;
-    if (shoulder_pwm < PWM_START)
+    lift_active_cmd = lift_target_cmd;
+    if (lift_pwm < PWM_START)
     {
-      shoulder_pwm = PWM_START;
+      lift_pwm = PWM_START;
     }
-    driveMotor(shoulder_active_cmd, shoulder_pwm, SHOULDER_RPWM, SHOULDER_LPWM);
-    last_shoulder_ramp_ms = now;
+    driveMotor(lift_active_cmd, lift_pwm, LIFT_RPWM, LIFT_LPWM);
+    last_lift_ramp_ms = now;
     return;
   }
 
   // Continue ramping toward target
-  if ((now - last_shoulder_ramp_ms) >= PWM_RAMP_INTERVAL_MS)
+  if ((now - last_lift_ramp_ms) >= PWM_RAMP_INTERVAL_MS)
   {
-    shoulder_pwm += PWM_RAMP_STEP;
-    if (shoulder_pwm > PWM_TARGET) {
-      shoulder_pwm = PWM_TARGET;
+    lift_pwm += PWM_RAMP_STEP;
+    if (lift_pwm > PWM_TARGET) {
+      lift_pwm = PWM_TARGET;
     }
-    last_shoulder_ramp_ms = now;
+    last_lift_ramp_ms = now;
   }
 
-  driveMotor(shoulder_active_cmd, shoulder_pwm, SHOULDER_RPWM, SHOULDER_LPWM);
+  driveMotor(lift_active_cmd, lift_pwm, LIFT_RPWM, LIFT_LPWM);
 }
 
 // ===== SERVO FUNCTIONS =====
-void updateElbowServo()
+void updateBeakerServo()
 {
-  // Immediate update (no smoothing needed since ROS2 handles smoothing)
-  if (elbow_servo_current != elbow_servo_target)
+  /// Move immediately to the discrete position commanded by ROS 2.
+  if (beaker_servo_current != beaker_servo_target)
   {
-    elbow_servo_current = elbow_servo_target;
-    elbowServo.write(elbow_servo_current);
+    beaker_servo_current = beaker_servo_target;
+    beakerServo.write(beaker_servo_current);
   }
 }
 
@@ -183,34 +183,34 @@ void handleIncomingByte(uint8_t b)
     case WAIT_HEADER:
       if (b == PACKET_HEADER)
       {
-        parse_state = WAIT_SHOULDER;
+        parse_state = WAIT_LIFT;
       }
       break;
 
-    case WAIT_SHOULDER:
-      rx_shoulder = b;
-      parse_state = WAIT_ELBOW_SERVO;
+    case WAIT_LIFT:
+      rx_lift = b;
+      parse_state = WAIT_BEAKER_SERVO;
       break;
 
-    case WAIT_ELBOW_SERVO:
-      rx_elbow_servo = b;
+    case WAIT_BEAKER_SERVO:
+      rx_beaker_servo = b;
       parse_state = WAIT_CHECKSUM;
       break;
 
     case WAIT_CHECKSUM:
     {
-      // Checksum = shoulder_cmd ^ servo_angle (matches ROS2)
-      uint8_t expected_checksum = rx_shoulder ^ rx_elbow_servo;
+      // Checksum = lift_cmd ^ servo_angle (matches ROS2)
+      uint8_t expected_checksum = rx_lift ^ rx_beaker_servo;
 
       if (b == expected_checksum &&
-          rx_shoulder <= CMD_RETRACT &&
-          rx_elbow_servo <= 180)  // Servo angle 0-180
+          rx_lift <= CMD_RETRACT &&
+          rx_beaker_servo <= 180)  // Servo angle 0-180
       {
-        // Update shoulder motor
-        shoulder_target_cmd = rx_shoulder;
+        // Update lift motor
+        lift_target_cmd = rx_lift;
         
-        // Update elbow servo
-        elbow_servo_target = constrain(rx_elbow_servo, ELBOW_SERVO_MIN, ELBOW_SERVO_MAX);
+        // Update beaker servo
+        beaker_servo_target = constrain(rx_beaker_servo, BEAKER_SERVO_MIN, BEAKER_SERVO_MAX);
         
         last_cmd_ms = millis();
       }
@@ -230,22 +230,22 @@ void setup()
 {
   Serial.begin(115200);
 
-  // Initialize elbow servo
-  elbowServo.setPeriodHertz(50);
-  elbowServo.attach(ELBOW_SERVO_PIN, 500, 2400);
-  elbowServo.write(ELBOW_SERVO_CENTER);
-  elbow_servo_current = ELBOW_SERVO_CENTER;
-  elbow_servo_target = ELBOW_SERVO_CENTER;
+  // Initialize beaker servo
+  beakerServo.setPeriodHertz(50);
+  beakerServo.attach(BEAKER_SERVO_PIN, 500, 2400);
+  beakerServo.write(BEAKER_SERVO_START);
+  beaker_servo_current = BEAKER_SERVO_START;
+  beaker_servo_target = BEAKER_SERVO_START;
 
-  // Initialize shoulder motor PWM
-  if (!ledcAttach(SHOULDER_RPWM, PWM_FREQ, PWM_RESOLUTION)) {
+  // Initialize lift motor PWM
+  if (!ledcAttach(LIFT_RPWM, PWM_FREQ, PWM_RESOLUTION)) {
     while (true) {}
   }
-  if (!ledcAttach(SHOULDER_LPWM, PWM_FREQ, PWM_RESOLUTION)) {
+  if (!ledcAttach(LIFT_LPWM, PWM_FREQ, PWM_RESOLUTION)) {
     while (true) {}
   }
 
-  stopShoulderMotor();
+  stopLiftMotor();
   last_cmd_ms = millis();
   
   Serial.println("READY");
@@ -261,18 +261,18 @@ void loop()
     handleIncomingByte(b);
   }
 
-  // Timeout safety - stop shoulder motor
+  // Timeout safety - stop lift motor
   if ((millis() - last_cmd_ms) > CMD_TIMEOUT_MS)
   {
-    shoulder_target_cmd = CMD_STOP;
+    lift_target_cmd = CMD_STOP;
     // Don't reset servo on timeout - hold position
   }
 
-  // Update shoulder motor
-  updateShoulderRamp();
+  // Update lift motor
+  updateLiftRamp();
 
-  // Update elbow servo
-  updateElbowServo();
+  // Update beaker servo
+  updateBeakerServo();
 
   delay(5);
 }

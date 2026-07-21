@@ -221,15 +221,19 @@ private:
   int hub_port_ = 4;
   int channel_ = 0;
 
-  // Existing tested rescale factor.
-  // Confirm its resulting units when implementing the new .cpp.
-  double rescale_factor_ = 0.00146103896;
+  /*
+   * Match the arm Phidget stepper configuration exactly.
+   * The ROS controller supplies velocity in rad/s. The hardware interface
+   * integrates that command into a position target, converts it to degrees,
+   * and sends it to the Phidget using setTargetPosition().
+   */
+  double auger_target_position_rad_ = 0.0;
+  double auger_command_limit_rad_s_ = 1.0;
 
-  double maximum_auger_velocity_ = 1.5;
-
-  double auger_acceleration_ = 3.5;
-
-  double maximum_stepper_current_a_ = 0.67;
+  double auger_rescale_factor_deg_ = 0.001125;
+  double auger_velocity_limit_deg_ = 75.0;
+  double auger_acceleration_deg_ = 150.0;
+  double auger_current_limit_a_ = 0.67;
 
   // =========================================================================
   // LAST HARDWARE COMMANDS

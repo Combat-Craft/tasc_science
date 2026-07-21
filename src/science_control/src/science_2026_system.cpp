@@ -256,6 +256,7 @@ hardware_interface::CallbackReturn Science2026System::on_init(
   last_lift_command_byte_ = ACT_STOP;
   last_tray_servo_byte_ = 0;
   last_auger_velocity_command_ = 0.0;
+  auger_target_position_rad_ = 0.0;
 
   hardware_active_ = false;
 
@@ -597,11 +598,6 @@ void Science2026System::cleanup_phidgets()
 
   if (stepper_attached_)
   {
-    // Stop continuous rotation before disengaging.
-    phidget_ok(
-      PhidgetStepper_setVelocityLimit(stepper_, 0.0),
-      "setVelocityLimit(0)");
-
     phidget_ok(
       PhidgetStepper_setEngaged(stepper_, 0),
       "setEngaged(0)");
@@ -708,7 +704,7 @@ hardware_interface::CallbackReturn Science2026System::on_configure(
   if (!phidget_ok(
       PhidgetStepper_setRescaleFactor(
         stepper_,
-        rescale_factor_),
+        auger_rescale_factor_deg_),
       "setRescaleFactor"))
   {
     cleanup_phidgets();
@@ -758,24 +754,21 @@ hardware_interface::CallbackReturn Science2026System::on_activate(
 
   if (stepper_ != nullptr && stepper_attached_)
   {
-    /*
-     * The Phidget must be placed in Run Mode for continuous rotation.
-     * Control mode must be selected before engaging the controller.
-     */
+    // Match the arm Phidget initialization exactly.
     if (!phidget_ok(
-        PhidgetStepper_setControlMode(
+        PhidgetStepper_setAcceleration(
           stepper_,
-          CONTROL_MODE_RUN),
-        "setControlMode(CONTROL_MODE_RUN)"))
+          auger_acceleration_deg_),
+        "PhidgetStepper_setAcceleration auger"))
     {
       return hardware_interface::CallbackReturn::ERROR;
     }
 
     if (!phidget_ok(
-        PhidgetStepper_setAcceleration(
+        PhidgetStepper_setVelocityLimit(
           stepper_,
-          auger_acceleration_),
-        "setAcceleration"))
+          auger_velocity_limit_deg_),
+        "PhidgetStepper_setVelocityLimit auger"))
     {
       return hardware_interface::CallbackReturn::ERROR;
     }
@@ -783,18 +776,8 @@ hardware_interface::CallbackReturn Science2026System::on_activate(
     if (!phidget_ok(
         PhidgetStepper_setCurrentLimit(
           stepper_,
-          maximum_stepper_current_a_),
-        "setCurrentLimit"))
-    {
-      return hardware_interface::CallbackReturn::ERROR;
-    }
-
-    // Run Mode resets the velocity limit, so explicitly initialize it to zero.
-    if (!phidget_ok(
-        PhidgetStepper_setVelocityLimit(
-          stepper_,
-          0.0),
-        "setVelocityLimit(0)"))
+          auger_current_limit_a_),
+        "PhidgetStepper_setCurrentLimit auger"))
     {
       return hardware_interface::CallbackReturn::ERROR;
     }
@@ -803,25 +786,38 @@ hardware_interface::CallbackReturn Science2026System::on_activate(
         PhidgetStepper_setEngaged(
           stepper_,
           1),
-        "setEngaged(1)"))
+        "PhidgetStepper_setEngaged auger"))
     {
       return hardware_interface::CallbackReturn::ERROR;
     }
 
-    double position = 0.0;
+    double auger_position_deg = 0.0;
 
-    if (phidget_ok(
+    if (!phidget_ok(
         PhidgetStepper_getPosition(
           stepper_,
-          &position),
-        "getPosition"))
+          &auger_position_deg),
+        "PhidgetStepper_getPosition auger"))
     {
-      /*
-       * This is the Phidget's internally tracked step position.
-       * It is not encoder feedback from the physical auger.
-       */
-      auger_position_state_ = position;
+      return hardware_interface::CallbackReturn::ERROR;
     }
+
+    auger_target_position_rad_ =
+      auger_position_deg * PI / 180.0;
+
+    auger_position_state_ =
+      auger_target_position_rad_;
+
+    phidget_ok(
+      PhidgetStepper_setTargetPosition(
+        stepper_,
+        auger_position_deg),
+      "PhidgetStepper_setTargetPosition auger");
+  }
+  else
+  {
+    auger_target_position_rad_ =
+      auger_position_state_;
   }
 
   hardware_active_ = true;
@@ -855,16 +851,10 @@ hardware_interface::CallbackReturn Science2026System::on_deactivate(
   if (stepper_ != nullptr && stepper_attached_)
   {
     phidget_ok(
-      PhidgetStepper_setVelocityLimit(
-        stepper_,
-        0.0),
-      "setVelocityLimit(0)");
-
-    phidget_ok(
       PhidgetStepper_setEngaged(
         stepper_,
         0),
-      "setEngaged(0)");
+      "PhidgetStepper_setEngaged(0) auger");
   }
 
   cleanup_phidgets();
@@ -919,36 +909,28 @@ hardware_interface::return_type Science2026System::read(
     estimated_lift_max_position_m_);
 
   /*
-   * Auger:
-   * The Phidget tracks commanded steps internally, but there is no encoder.
-   * If the Phidget is unavailable, integrate the commanded velocity so RViz
-   * still shows the auger spinning.
+   * Auger position state. The Phidget position is expressed in degrees after
+   * applying the same rescale factor used by the arm. Convert it back to ROS
+   * radians. Without hardware, report the integrated target position.
    */
   if (stepper_ != nullptr && stepper_attached_)
   {
-    double position = 0.0;
+    double auger_position_deg = 0.0;
 
     if (phidget_ok(
         PhidgetStepper_getPosition(
           stepper_,
-          &position),
-        "getPosition"))
+          &auger_position_deg),
+        "PhidgetStepper_getPosition auger"))
     {
-      auger_position_state_ = position;
+      auger_position_state_ =
+        auger_position_deg * PI / 180.0;
     }
   }
   else
   {
-    const double estimated_velocity =
-      std::isfinite(auger_velocity_command_) ?
-      clamp_value(
-        auger_velocity_command_,
-        -maximum_auger_velocity_,
-        maximum_auger_velocity_) :
-      0.0;
-
-    auger_position_state_ +=
-      estimated_velocity * dt;
+    auger_position_state_ =
+      auger_target_position_rad_;
   }
 
   /*
@@ -967,7 +949,7 @@ hardware_interface::return_type Science2026System::read(
 
 hardware_interface::return_type Science2026System::write(
   const rclcpp::Time &,
-  const rclcpp::Duration &)
+  const rclcpp::Duration & period)
 {
   if (!hardware_active_)
   {
@@ -1021,31 +1003,32 @@ hardware_interface::return_type Science2026System::write(
   last_tray_servo_byte_ = tray_servo_byte;
 
   // -------------------------------------------------------------------------
-  // Auger stepper velocity command
+  // Auger stepper command
   // -------------------------------------------------------------------------
+
+  const double dt =
+    clamp_value(period.seconds(), 0.0, 0.1);
 
   if (!std::isfinite(auger_velocity_command_))
   {
     auger_velocity_command_ = 0.0;
   }
 
-  const double requested_auger_velocity =
+  auger_velocity_command_ =
     clamp_value(
       auger_velocity_command_,
-      -maximum_auger_velocity_,
-      maximum_auger_velocity_);
+      -auger_command_limit_rad_s_,
+      auger_command_limit_rad_s_);
+
+  // Same method as the arm: integrate velocity into a position target.
+  auger_target_position_rad_ +=
+    auger_velocity_command_ * dt;
+
+  const double auger_target_position_deg =
+    auger_target_position_rad_ * 180.0 / PI;
 
   if (stepper_ != nullptr && stepper_attached_)
   {
-    if (!phidget_ok(
-        PhidgetStepper_setVelocityLimit(
-          stepper_,
-          requested_auger_velocity),
-        "setVelocityLimit"))
-    {
-      return hardware_interface::return_type::ERROR;
-    }
-
     int engaged = 0;
 
     if (
@@ -1053,22 +1036,35 @@ hardware_interface::return_type Science2026System::write(
         PhidgetStepper_getEngaged(
           stepper_,
           &engaged),
-        "getEngaged") &&
+        "PhidgetStepper_getEngaged auger") &&
       !engaged)
     {
+      RCLCPP_WARN(
+        rclcpp::get_logger("Science2026System"),
+        "Auger stepper was disengaged. Re-engaging.");
+
       if (!phidget_ok(
           PhidgetStepper_setEngaged(
             stepper_,
             1),
-          "setEngaged re-engage"))
+          "PhidgetStepper_setEngaged auger re-engage"))
       {
         return hardware_interface::return_type::ERROR;
       }
     }
+
+    if (!phidget_ok(
+        PhidgetStepper_setTargetPosition(
+          stepper_,
+          auger_target_position_deg),
+        "PhidgetStepper_setTargetPosition auger"))
+    {
+      return hardware_interface::return_type::ERROR;
+    }
   }
 
   last_auger_velocity_command_ =
-    requested_auger_velocity;
+    auger_velocity_command_;
 
   return hardware_interface::return_type::OK;
 }
