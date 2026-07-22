@@ -192,7 +192,7 @@ private:
 
   int esp32_serial_fd_ = -1;
 
-  std::string esp32_serial_device_ = "/dev/ttyUSB0";
+  std::string esp32_serial_device_ = "/dev/scienceUSB";
 
   bool esp32_connected_ = false;
 
@@ -222,7 +222,7 @@ private:
   int channel_ = 0;
 
   /*
-   * Match the arm Phidget stepper configuration exactly.
+   * Matches the arm Phidget stepper configuration
    * The ROS controller supplies velocity in rad/s. The hardware interface
    * integrates that command into a position target, converts it to degrees,
    * and sends it to the Phidget using setTargetPosition().

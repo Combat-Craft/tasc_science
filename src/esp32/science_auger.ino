@@ -1,218 +1,294 @@
 #include <ESP32Servo.h>
 
-// ===== SERVO (BEAKER) =====
+// =============================================================================
+// SCIENCE ESP32 FIRMWARE
+//
+// Incoming binary packet:
+//   [0xAA] [lift command] [tray angle] [checksum]
+//
+// Lift commands:
+//   0 = stop
+//   1 = extend
+//   2 = retract
+//
+// Tray angle:
+//   0 to 180 degrees
+//
+// Checksum:
+//   lift command XOR tray angle
+// =============================================================================
+
+// =============================================================================
+// BEAKER SERVO
+// =============================================================================
+
 Servo beakerServo;
-const int BEAKER_SERVO_PIN = 23;        // Pin for servo signal
+
+const int BEAKER_SERVO_PIN = 23;
 const int BEAKER_SERVO_MIN = 0;
 const int BEAKER_SERVO_MAX = 180;
 const int BEAKER_SERVO_START = 0;
-int beaker_servo_target = 90;
-int beaker_servo_current = 90;
 
-// ===== LIFT MOTOR (BTS7960) =====
-const int LIFT_RPWM = 18;
-const int LIFT_LPWM = 19;
+// Same pulse range as the standalone test that worked.
+const int BEAKER_SERVO_MIN_PULSE_US = 500;
+const int BEAKER_SERVO_MAX_PULSE_US = 2400;
 
-// PWM settings
-const int PWM_FREQ = 1000;
+// =============================================================================
+// LIFT MOTOR, BTS7960
+// =============================================================================
+
+const int LIFT_RPWM_PIN = 18;
+const int LIFT_LPWM_PIN = 19;
+
+const int LIFT_RPWM_CHANNEL = 6;
+const int LIFT_LPWM_CHANNEL = 7;
+
+const int PWM_FREQUENCY = 1000;
 const int PWM_RESOLUTION = 8;
 
-// Ramp settings
-const int PWM_START = 0;
 const int PWM_TARGET = 255;
 const int PWM_RAMP_STEP = 4;
 const unsigned long PWM_RAMP_INTERVAL_MS = 20;
 
-// ===== PROTOCOL - MATCHES ROS2 =====
+// =============================================================================
+// SERIAL PROTOCOL
+// =============================================================================
+
 const uint8_t PACKET_HEADER = 0xAA;
 
 const uint8_t CMD_STOP = 0;
 const uint8_t CMD_EXTEND = 1;
 const uint8_t CMD_RETRACT = 2;
 
-// Timeout safety
-const unsigned long CMD_TIMEOUT_MS = 300;
-unsigned long last_cmd_ms = 0;
+const unsigned long COMMAND_TIMEOUT_MS = 300;
+unsigned long last_valid_command_ms = 0;
 
-// ===== STATE MACHINE =====
-// Packet: [0xAA] [Lift_CMD] [Servo_Angle] [Checksum]
 enum ParseState
 {
   WAIT_HEADER,
   WAIT_LIFT,
-  WAIT_BEAKER_SERVO,
+  WAIT_TRAY,
   WAIT_CHECKSUM
 };
 
 ParseState parse_state = WAIT_HEADER;
-uint8_t rx_lift = CMD_STOP;
-uint8_t rx_beaker_servo = 0;
 
-// Lift motor state
-uint8_t lift_target_cmd = CMD_STOP;
-uint8_t lift_active_cmd = CMD_STOP;
+uint8_t received_lift_command = CMD_STOP;
+uint8_t received_tray_angle = BEAKER_SERVO_START;
+
+// =============================================================================
+// LIFT STATE
+// =============================================================================
+
+uint8_t lift_target_command = CMD_STOP;
+uint8_t lift_active_command = CMD_STOP;
+
 int lift_pwm = 0;
 unsigned long last_lift_ramp_ms = 0;
 
-// ===== MOTOR FUNCTIONS =====
-void stopMotor(int rpwm_pin, int lpwm_pin)
+// =============================================================================
+// LIFT MOTOR FUNCTIONS
+// =============================================================================
+
+void writeLiftPwm(int rpwm, int lpwm)
 {
-  ledcWrite(rpwm_pin, 0);
-  ledcWrite(lpwm_pin, 0);
+  rpwm = constrain(rpwm, 0, PWM_TARGET);
+  lpwm = constrain(lpwm, 0, PWM_TARGET);
+
+  ledcWriteChannel(LIFT_RPWM_CHANNEL, rpwm);
+  ledcWriteChannel(LIFT_LPWM_CHANNEL, lpwm);
 }
 
-void driveMotor(int cmd, int pwm_val, int rpwm_pin, int lpwm_pin)
+void stopLiftOutput()
 {
-  if (cmd == CMD_EXTEND)
+  writeLiftPwm(0, 0);
+}
+
+void driveLift(uint8_t command, int pwm_value)
+{
+  if (command == CMD_EXTEND)
   {
-    ledcWrite(rpwm_pin, pwm_val);
-    ledcWrite(lpwm_pin, 0);
+    writeLiftPwm(pwm_value, 0);
   }
-  else if (cmd == CMD_RETRACT)
+  else if (command == CMD_RETRACT)
   {
-    ledcWrite(rpwm_pin, 0);
-    ledcWrite(lpwm_pin, pwm_val);
+    writeLiftPwm(0, pwm_value);
   }
   else
   {
-    stopMotor(rpwm_pin, lpwm_pin);
+    stopLiftOutput();
   }
 }
 
-void stopLiftMotor()
+void stopLiftImmediately()
 {
-  lift_target_cmd = CMD_STOP;
-  lift_active_cmd = CMD_STOP;
+  lift_target_command = CMD_STOP;
+  lift_active_command = CMD_STOP;
   lift_pwm = 0;
-  stopMotor(LIFT_RPWM, LIFT_LPWM);
+
+  stopLiftOutput();
 }
 
 void updateLiftRamp()
 {
-  unsigned long now = millis();
+  const unsigned long now = millis();
 
-  if (lift_target_cmd == CMD_STOP)
+  // Stop request: ramp the active direction down to zero.
+  if (lift_target_command == CMD_STOP)
   {
-    lift_active_cmd = CMD_STOP;
-    if (lift_pwm > 0 && (now - last_lift_ramp_ms) >= PWM_RAMP_INTERVAL_MS)
+    if (
+      lift_pwm > 0 &&
+      now - last_lift_ramp_ms >= PWM_RAMP_INTERVAL_MS)
     {
       lift_pwm -= PWM_RAMP_STEP;
-      if (lift_pwm < 0) {
+
+      if (lift_pwm < 0)
+      {
         lift_pwm = 0;
       }
+
       last_lift_ramp_ms = now;
     }
 
     if (lift_pwm == 0)
     {
-      stopMotor(LIFT_RPWM, LIFT_LPWM);
+      lift_active_command = CMD_STOP;
+      stopLiftOutput();
     }
     else
     {
-      driveMotor(lift_active_cmd, lift_pwm, LIFT_RPWM, LIFT_LPWM);
+      driveLift(lift_active_command, lift_pwm);
     }
+
     return;
   }
 
-  // If direction changes, force a stop before reversing
-  if (lift_active_cmd != CMD_STOP && lift_active_cmd != lift_target_cmd)
+  // Direction change: ramp down before reversing.
+  if (
+    lift_active_command != CMD_STOP &&
+    lift_active_command != lift_target_command)
   {
-    if ((now - last_lift_ramp_ms) >= PWM_RAMP_INTERVAL_MS)
+    if (now - last_lift_ramp_ms >= PWM_RAMP_INTERVAL_MS)
     {
       lift_pwm -= PWM_RAMP_STEP;
-      if (lift_pwm < 0) {
+
+      if (lift_pwm < 0)
+      {
         lift_pwm = 0;
       }
+
       last_lift_ramp_ms = now;
     }
 
     if (lift_pwm == 0)
     {
-      lift_active_cmd = CMD_STOP;
-      stopMotor(LIFT_RPWM, LIFT_LPWM);
+      lift_active_command = CMD_STOP;
+      stopLiftOutput();
     }
     else
     {
-      driveMotor(lift_active_cmd, lift_pwm, LIFT_RPWM, LIFT_LPWM);
+      driveLift(lift_active_command, lift_pwm);
     }
+
     return;
   }
 
-  // Start motion
-  if (lift_active_cmd == CMD_STOP)
+  // Start moving in the requested direction.
+  if (lift_active_command == CMD_STOP)
   {
-    lift_active_cmd = lift_target_cmd;
-    if (lift_pwm < PWM_START)
-    {
-      lift_pwm = PWM_START;
-    }
-    driveMotor(lift_active_cmd, lift_pwm, LIFT_RPWM, LIFT_LPWM);
+    lift_active_command = lift_target_command;
+    lift_pwm = 0;
     last_lift_ramp_ms = now;
+
+    driveLift(lift_active_command, lift_pwm);
     return;
   }
 
-  // Continue ramping toward target
-  if ((now - last_lift_ramp_ms) >= PWM_RAMP_INTERVAL_MS)
+  // Ramp toward full PWM.
+  if (now - last_lift_ramp_ms >= PWM_RAMP_INTERVAL_MS)
   {
     lift_pwm += PWM_RAMP_STEP;
-    if (lift_pwm > PWM_TARGET) {
+
+    if (lift_pwm > PWM_TARGET)
+    {
       lift_pwm = PWM_TARGET;
     }
+
     last_lift_ramp_ms = now;
   }
 
-  driveMotor(lift_active_cmd, lift_pwm, LIFT_RPWM, LIFT_LPWM);
+  driveLift(lift_active_command, lift_pwm);
 }
 
-// ===== SERVO FUNCTIONS =====
-void updateBeakerServo()
+// =============================================================================
+// VALID PACKET HANDLING
+// =============================================================================
+
+void applyValidPacket(
+  uint8_t lift_command,
+  uint8_t tray_angle)
 {
-  /// Move immediately to the discrete position commanded by ROS 2.
-  if (beaker_servo_current != beaker_servo_target)
-  {
-    beaker_servo_current = beaker_servo_target;
-    beakerServo.write(beaker_servo_current);
-  }
+  lift_target_command = lift_command;
+
+  const int safe_angle = constrain(
+    static_cast<int>(tray_angle),
+    BEAKER_SERVO_MIN,
+    BEAKER_SERVO_MAX);
+
+  // This intentionally matches the working standalone servo test:
+  // receive an angle, constrain it, and immediately call Servo.write().
+  beakerServo.write(safe_angle);
+
+  last_valid_command_ms = millis();
 }
 
-// ===== PARSING =====
-void handleIncomingByte(uint8_t b)
+// =============================================================================
+// BINARY PACKET PARSER
+// =============================================================================
+
+void handleIncomingByte(uint8_t incoming_byte)
 {
   switch (parse_state)
   {
     case WAIT_HEADER:
-      if (b == PACKET_HEADER)
+      if (incoming_byte == PACKET_HEADER)
       {
         parse_state = WAIT_LIFT;
       }
       break;
 
     case WAIT_LIFT:
-      rx_lift = b;
-      parse_state = WAIT_BEAKER_SERVO;
+      received_lift_command = incoming_byte;
+      parse_state = WAIT_TRAY;
       break;
 
-    case WAIT_BEAKER_SERVO:
-      rx_beaker_servo = b;
+    case WAIT_TRAY:
+      received_tray_angle = incoming_byte;
       parse_state = WAIT_CHECKSUM;
       break;
 
     case WAIT_CHECKSUM:
     {
-      // Checksum = lift_cmd ^ servo_angle (matches ROS2)
-      uint8_t expected_checksum = rx_lift ^ rx_beaker_servo;
+      const uint8_t expected_checksum =
+        received_lift_command ^ received_tray_angle;
 
-      if (b == expected_checksum &&
-          rx_lift <= CMD_RETRACT &&
-          rx_beaker_servo <= 180)  // Servo angle 0-180
+      const bool checksum_is_valid =
+        incoming_byte == expected_checksum;
+
+      const bool lift_is_valid =
+        received_lift_command <= CMD_RETRACT;
+
+      const bool tray_is_valid =
+        received_tray_angle <= BEAKER_SERVO_MAX;
+
+      if (
+        checksum_is_valid &&
+        lift_is_valid &&
+        tray_is_valid)
       {
-        // Update lift motor
-        lift_target_cmd = rx_lift;
-        
-        // Update beaker servo
-        beaker_servo_target = constrain(rx_beaker_servo, BEAKER_SERVO_MIN, BEAKER_SERVO_MAX);
-        
-        last_cmd_ms = millis();
+        applyValidPacket(
+          received_lift_command,
+          received_tray_angle);
       }
 
       parse_state = WAIT_HEADER;
@@ -225,54 +301,79 @@ void handleIncomingByte(uint8_t b)
   }
 }
 
-// ===== SETUP =====
+// =============================================================================
+// SETUP
+// =============================================================================
+
 void setup()
 {
   Serial.begin(115200);
 
-  // Initialize beaker servo
+  // Assign the BTS7960 outputs to explicit LEDC channels.
+  // These are separate from the channel selected by ESP32Servo.
+  const bool rpwm_attached = ledcAttachChannel(
+    LIFT_RPWM_PIN,
+    PWM_FREQUENCY,
+    PWM_RESOLUTION,
+    LIFT_RPWM_CHANNEL);
+
+  const bool lpwm_attached = ledcAttachChannel(
+    LIFT_LPWM_PIN,
+    PWM_FREQUENCY,
+    PWM_RESOLUTION,
+    LIFT_LPWM_CHANNEL);
+
+  if (!rpwm_attached || !lpwm_attached)
+  {
+    while (true)
+    {
+      delay(1000);
+    }
+  }
+
+  stopLiftImmediately();
+
+  // Match the standalone working servo setup exactly.
   beakerServo.setPeriodHertz(50);
-  beakerServo.attach(BEAKER_SERVO_PIN, 500, 2400);
+  beakerServo.attach(
+    BEAKER_SERVO_PIN,
+    BEAKER_SERVO_MIN_PULSE_US,
+    BEAKER_SERVO_MAX_PULSE_US);
+
   beakerServo.write(BEAKER_SERVO_START);
-  beaker_servo_current = BEAKER_SERVO_START;
-  beaker_servo_target = BEAKER_SERVO_START;
 
-  // Initialize lift motor PWM
-  if (!ledcAttach(LIFT_RPWM, PWM_FREQ, PWM_RESOLUTION)) {
-    while (true) {}
-  }
-  if (!ledcAttach(LIFT_LPWM, PWM_FREQ, PWM_RESOLUTION)) {
-    while (true) {}
-  }
+  last_valid_command_ms = millis();
 
-  stopLiftMotor();
-  last_cmd_ms = millis();
-  
   Serial.println("READY");
 }
 
-// ===== LOOP =====
+// =============================================================================
+// LOOP
+// =============================================================================
+
 void loop()
 {
-  // Process incoming serial data
   while (Serial.available() > 0)
   {
-    uint8_t b = static_cast<uint8_t>(Serial.read());
-    handleIncomingByte(b);
+    const int serial_value = Serial.read();
+
+    if (serial_value >= 0)
+    {
+      handleIncomingByte(
+        static_cast<uint8_t>(serial_value));
+    }
   }
 
-  // Timeout safety - stop lift motor
-  if ((millis() - last_cmd_ms) > CMD_TIMEOUT_MS)
+  // Stop only the lift when ROS 2 communication is lost.
+  // The servo holds its last commanded angle.
+  if (
+    millis() - last_valid_command_ms >
+    COMMAND_TIMEOUT_MS)
   {
-    lift_target_cmd = CMD_STOP;
-    // Don't reset servo on timeout - hold position
+    lift_target_command = CMD_STOP;
   }
 
-  // Update lift motor
   updateLiftRamp();
-
-  // Update beaker servo
-  updateBeakerServo();
 
   delay(5);
 }
