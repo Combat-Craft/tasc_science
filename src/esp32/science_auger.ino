@@ -24,7 +24,7 @@
 
 Servo beakerServo;
 
-const int BEAKER_SERVO_PIN = 23;
+const int BEAKER_SERVO_PIN = 22;
 const int BEAKER_SERVO_MIN = 0;
 const int BEAKER_SERVO_MAX = 180;
 const int BEAKER_SERVO_START = 0;
